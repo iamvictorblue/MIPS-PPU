@@ -1,18 +1,15 @@
 `timescale 1ns / 1ns
 
-// Phase 3 Module. This phase is just setting up the basic
-// Structure and whatnot. No need to explicitly compile
-// the rest of the files
-`include "src/npc-pc-handler.v"
-`include "src/pipeline-registers.v"
-`include "src/control-unit.v"
+// ICOM4215  - Fase III (Sistema de Control)
+`include "npc-pc-handler.v"
+`include "pipeline-registers.v"
+`include "control-unit.v"
 
 module rom_512x8 (output reg [31:0] DataOut, input [7:0] Address);
     reg [7:0] Mem[0:511];       //512 8bit locations
     always@(Address)            //Loop when Address changes
         begin 
             DataOut = {Mem[Address], Mem[Address+1], Mem[Address+2], Mem[Address+3]};
-            // $display("\n\n\n\nLoading Instruction:\n-----------------------------------------------------\nAddress: %b | Instruction Memory: %b | time: %d\n", Address, DataOut, $time);
         end
 endmodule
 
@@ -116,7 +113,7 @@ module phase3Tester;
 
     // Precharging the Instruction Memory
     initial begin
-        fi = $fopen("precharge/sparc-instructions-precharge.txt","r");
+        fi = $fopen("p3.txt","r");
         Addr = 8'b00000000;
         // $display("Precharging Instruction Memory...\n---------------------------------------------\n");
         while (!$feof(fi)) begin
@@ -229,56 +226,54 @@ module phase3Tester;
     );
 
 
+
     initial begin
-        $dumpfile("gtk-wave-testers/sparc-mini-fantastica.vcd"); // pass this to GTK Wave to visualize better wtf is going on
-        $dumpvars(0, phase3Tester);
-        #52;
-        $display("\n----------------------------------------------------------\nSimmulation Complete! Remember to dump this on GTK Wave and subscribe to PewDiePie...");
-        $finish;
-    end 
-
-    initial  begin
-        $monitor("\n\n\nTIME: %d | S: %b\n---------------------------------\
-        \nPC: %d | nPC: %d\n--------------------------------------\
-        \nInstruction at Decode Stage: %b | Signals at Decode Stage:\
-        \n--------------------------------------------------\
-        \nPC in ID stage: %d | jmpl: %b | call: %b | load: %b | Register File Enable: %b | Data MEM SE: %b | Data MEM R/W: %b | Data MEM Enable: %b\
-        \nData MEM Size: %b | Condition Code Enable: %b | I31: %b | I30: %b | I24: %b | I13: %b | Alu Opcode: %b | Branch Instruction: %b\
-        \n\Signals at Excecute Stage:\
-        \n--------------------------------------------------\
-        \nPC in EX Stage: %d | jmpl: %b | call: %b | load: %b | Register File Enable: %b | Data MEM SE: %b | Data MEM R/W: %b | Data MEM Enable: %b\
-        \nData MEM Size: %b | Condition Code Enable: %b | I31: %b | I30: %b | I24: %b | I13: %b | Alu Opcode: %b\
-        \n\Signals at Memory Stage:\
-        \n--------------------------------------------------\
-        \nPC in MEM Stage: %d | jmpl: %b | call: %b | load: %b | Register File Enable: %b | Data MEM SE: %b | Data MEM R/W: %b | Data MEM Enable: %b\
-        \nData MEM Size: %b\
-        \n\Signals at  Writeback Stage:\
-        \n--------------------------------------------------\
-        \nRegister File Enable: %b",
-        $time, S,
-        
-        PC, nPC,
-
-        instruction_out, 
-
-        PC_ID, ID_CU[0], ID_CU[1], ID_CU[2], ID_CU[3], ID_CU[4], ID_CU[5], ID_CU[6],
-        ID_CU[8:7], ID_CU[9], ID_CU[10], ID_CU[11], ID_CU[12], ID_CU[13], ID_CU[17:14], ID_branch_instr,
-        
-        PC_EX, EX_CU[0], EX_CU[1], EX_CU[2], EX_CU[3], EX_CU[4], EX_CU[5], EX_CU[6],
-        EX_CU[8:7], CC_Enable, IS[0], IS[1], IS[2], IS[3], ALU_OP,
-
-        PC_MEM, OutputHandlerInstructions[0], OutputHandlerInstructions[1], OutputHandlerInstructions[2], MEM_CU, DataMemInstructions[0], DataMemInstructions[1], DataMemInstructions[2], 
-        DataMemInstructions[4:3],
-
-        WB_Register_File_Enable
-        );
+    $monitor("\n\n\nTIME: %d | S: %b\n---------------------------------"\
+             "\nPC: %d | nPC: %d\n--------------------------------------",
+             $time, S, PC, nPC);
     end
+
+
+    // initial begin
+    // $monitor("\n\n\nTIME: %d | S: %b\n---------------------------------"\
+    // "\nPC: %d | nPC: %d\n--------------------------------------",
+    // // "\nInstruction at Decode Stage: %b | Signals at Decode Stage:"\
+    // // "\n--------------------------------------------------"\
+    // // "\nPC in ID stage: %d | jmpl: %b | call: %b | load: %b | Register File Enable: %b | Data MEM SE: %b | Data MEM R/W: %b | Data MEM Enable: %b"\
+    // // "\nData MEM Size: %b | Condition Code Enable: %b | I31: %b | I30: %b | I24: %b | I13: %b | Alu Opcode: %b | Branch Instruction: %b"\
+    // // "\nSignals at Execute Stage:"\
+    // // "\n--------------------------------------------------"\
+    // // "\nPC in EX Stage: %d | jmpl: %b | call: %b | load: %b | Register File Enable: %b | Data MEM SE: %b | Data MEM R/W: %b | Data MEM Enable: %b"\
+    // // "\nData MEM Size: %b | Condition Code Enable: %b | I31: %b | I30: %b | I24: %b | I13: %b | Alu Opcode: %b"\
+    // // "\nSignals at Memory Stage:"\
+    // // "\n--------------------------------------------------"\
+    // // "\nPC in MEM Stage: %d | jmpl: %b | call: %b | load: %b | Register File Enable: %b | Data MEM SE: %b | Data MEM R/W: %b | Data MEM Enable: %b"\
+    // // "\nData MEM Size: %b"\
+    // // "\nSignals at Writeback Stage:"\
+    // // "\n--------------------------------------------------"\
+    // // "\nRegister File Enable: %b",
+    //  $time, S, PC, nPC
+    // //, instruction_out, 
+    // // PC_ID, ID_CU[0], ID_CU[1], ID_CU[2], ID_CU[3], ID_CU[4], ID_CU[5], ID_CU[6],
+    // // ID_CU[8:7], ID_CU[9], ID_CU[10], ID_CU[11], ID_CU[12], ID_CU[13], ID_CU[17:14], ID_branch_instr,
+    // // PC_EX, EX_CU[0], EX_CU[1], EX_CU[2], EX_CU[3], EX_CU[4], EX_CU[5], EX_CU[6],
+    // // EX_CU[8:7], CC_Enable, IS[0], IS[1], IS[2], IS[3], ALU_OP,
+    // // PC_MEM, OutputHandlerInstructions[0], OutputHandlerInstructions[1], OutputHandlerInstructions[2], MEM_CU, DataMemInstructions[0], DataMemInstructions[1], DataMemInstructions[2], 
+    // // DataMemInstructions[4:3],
+    //  WB_Register_File_Enable);
+    // end
 
     initial begin
         S = 1'b0;
         #40;
         S = 1'b1;
     end
+
+    // La simulación debe comenzar inicializando Clk en cero a tiempo cero. ^^^
+    // Entonces, debe cambiar de estado cada dos unidades de tiempo de manera perpetua. 
+    // La señal Reset debe tener un valor de 1 a tiempo cero y cambiar a 0 en tiempo 3. 
+    // La señal S del multiplexer debe tener un valor de cero a tiempo cero y debe cambiar a 1 a tiempo 40. 
+    // La simulación debe culminar en el tiempo 48.
 
     initial begin
         LE = 1'b1;
