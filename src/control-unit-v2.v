@@ -1,16 +1,16 @@
 `timescale 1ns / 1ps
 
 module ControlUnitMUX(
-    input wire select,
-    input wire [8:0] control_signals_in, // Input control signals
-    output reg [8:0] control_signals_out // Output control signals
+    input S,
+    input [18:0] control_signals_in, // Input control signals
+    output reg [18:0] control_signals_out // Output control signals
 );
 
 always @(*) begin
-    if (select == 1'b0) begin
+    if (S == 1'b0) begin
         control_signals_out = control_signals_in;
     end else begin
-        control_signals_out = 9'b0; // Output zeros for all control signals
+        control_signals_out = 18'b0; // Output zeros for all control signals
     end
 end
 
@@ -20,16 +20,27 @@ endmodule
 module ControlUnit(
     input [31:0] instruction,
     input reset,
-    output reg ALUOp, // Assuming ALUOp is a simplified control signal for example purposes
-    output reg Load,
-    output reg RegFileEnable,
-    output reg HiEnable,
-    output reg LoEnable,
-    output reg JalAdder,
-    output reg TaMux,
-    output reg RsAddrMux,
-    output reg WriteDestination,
-    output reg RegDst
+    output reg Cond_Mux,           // condition check, e.g., for branches
+    output reg Jump,
+    output reg Branch,       
+    output reg JalAdder,          
+    output reg [1:0] CMU,
+    output reg TaMux,              
+    output reg [1:0] WriteDestination,  
+    output reg [2:0] S0_S2,         // Assuming this is part of ALUOp or similar control
+    output reg Base_Addr_MUX,       // This could be equivalent to something like RegFileEnable but for base address
+    output reg RsAddrMux,         
+    output reg [3:0] ALUOp, 
+    output reg Data_Mem_RW,         
+    output reg Data_Mem_Enable,     
+    output reg [1:0] Data_Mem_Size, 
+    output reg RegDst,              // Equivalent to WriteDestination, selects destination register
+    output reg HiEnable,      
+    output reg RegFileEnable,// Equivalent to RegFileEnable, enables writing to the register file
+    output reg Jump_Addr_MUX_Enable,
+    output reg LoEnable,        // Equivalent to LoEnable, enables LO register operations
+    output reg MemtoReg,
+    output reg Load           
 );
 
 // Define opcodes for the instructions
@@ -119,9 +130,10 @@ always @(*) begin
                     FUNC_SLT, FUNC_SLTU, FUNC_AND, FUNC_OR, 
                     FUNC_XOR, FUNC_NOR, FUNC_SLL, FUNC_SLLV, 
                     FUNC_SRA, FUNC_SRAV, FUNC_SRL, FUNC_SRLV: begin
-                        ALUOp = 1;
+                        // ALUOp = 1;/ hacerlo para 4 bits y hacer logica correspondiente a cada
+                        // instruccion tipo R
                         RegFileEnable = 1;
-                        WriteDestination = 0; // Select 'rd' field as the destination
+                        WriteDestination = 00b'0; // Select 'rd' field as the destination // cambiar a señal de 2 bis
                     end
                     FUNC_JR, FUNC_JALR: begin
                         RsAddrMux = 1; // Control signal for jump register instructions
@@ -130,7 +142,7 @@ always @(*) begin
                             RegFileEnable = 1; // For JALR, link address is stored in register
                             RsAddrMux = 1;
                             WriteDestination = 0; // Select 'rd' field as the destination register.
-                            JalAdder = 0;
+                            JalAdder = 1;
                         end
                     end
                     FUNC_MFHI: begin

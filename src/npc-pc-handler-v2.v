@@ -19,7 +19,7 @@ module PC_Adder(
     assign pc_out = pc_in + 4; // Increment PC by 4 for sequential execution
 endmodule
 
-// PC and NPC Registers
+// PC and NPC Registers ( Hacer modulos apartes.)
 module PC_NPC_Register(
     input clk,
     input reset,
@@ -34,7 +34,7 @@ module PC_NPC_Register(
     end
 endmodule
 
-// PC MUX
+// PC MUX (BORRAR YA!)
 module PC_MUX(
     input [31:0] sequential_pc,
     input [31:0] branch_target,
