@@ -1,12 +1,12 @@
-`timescale 1ns / 1ns
+`timescale 1s / 1s
 
 // Include MIPS modules
 `include "npc-pc-handler-v2.v"
 `include "pipeline-registers-v2.v"
 `include "control-unit-v2.v"
 
-module rom_512x8 (output reg [31:0] DataOut, input [7:0] Address);
-    reg [7:0] Mem[0:511];       //512 8bit locations
+module rom_512x8 (output reg [31:0] DataOut, input [8:0] Address);
+    reg [7:0] Mem[0:511];       //512 9bit locations
     always@(Address)            //Loop when Address changes
         begin 
             DataOut = {Mem[Address], Mem[Address+1], Mem[Address+2], Mem[Address+3]};
@@ -18,99 +18,87 @@ module MIPS_Pipeline_tb;
     // Instruction Memory 
     integer fi, fo, code, i; 
     reg [7:0] data;
-    reg [7:0] Addr; 
+    reg [8:0] Addr; 
     wire [31:0] instruction;
 
     // Clock, Reset, and Control Signals
+    reg LE = 1;
     reg Clk, Reset;
     reg S; // Control signal for the Control Unit MUX
 
     // Wire declarations for interconnecting modules
     wire [31:0] PC, nPC; // PC and NPC values
-    wire [31:0] instruction_out;
-    wire [3:0] ALU_OP;
+    wire [31:0] instruction_id;
     wire [31:0] nPC4;
 
     // Declaration of wires for Control Unit output signals
     wire Cond_Mux, Jump, Branch, JalAdder, TaMux, Base_Addr_MUX, 
-    RsAddrMux, Data_Mem_RW, Data_Mem_Enable, RegDst, HiEnable, 
-    RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load;
-    wire [1:0] CMU, WriteDestination, Data_Mem_Size;
+    RsAddrMux, Data_Mem_RW, Data_Mem_Enable, Data_Mem_SE, HiEnable, 
+    RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load,CMUX;
+    wire [1:0] WriteDestination, Data_Mem_Size;
     wire [2:0] S0_S2;
     wire [3:0] ALUOp;
 
+    // Testbench signal declarations
+    wire [18:0] control_signals_from_cu; 
+    wire [18:0] control_signals_to_registers; 
 
     // PC Adder
     PC_Adder pc_adder(
-        .pc_in(PC),       // Current Program Counter
+        .pc_in(nPC),       // Current Program Counter
         .pc_out(nPC4)     // Output: Next Program Counter (PC + 4)
     );
 
-    //  PC Register
-    PC_NPC_Register pc_reg(
+    //  NPC Register
+    NPC_Register npc_reg(
         .clk(Clk),
         .reset(Reset),
         .load_enable(1'b1), // Assuming always enabled for simplicity
-        .data_in(nPC),      // Input data (could be from PC_MUX)
-        .data_out(PC),      // Current Program Counter
-        .is_npc(1'b0)       // Flag indicating this is the PC register
+        .data_in(nPC4),      
+        .data_out(nPC)     // Current Program Counter
+        
     );
 
-    //  NPC Register
-    PC_NPC_Register npc_reg(
+    //  PC Register
+    PC_Register pc_reg(
         .clk(Clk),
         .reset(Reset),
-        .load_enable(1'b1), // Assuming always enabled
-        .data_in(nPC4),
-        .data_out(nPC),     // Next Program Counter
-        .is_npc(1'b1)       // Flag indicating this is the NPC register
+        .load_enable(1'b1), // Assuming always enabled for simplicity
+        .data_in(nPC),     
+        .data_out(PC)      // Current Program Counter
+        
     );
 
-    //  PC MUX
-    PC_MUX pc_mux(
-        .sequential_pc(sequential_pc),        // Input: Sequential PC (PC + 4)
-        .branch_target(branch_target),
-        .jump_target(jump_target),
-        .select(select),
-        .next_pc(next_pc)
-    );
-
+    // //  PC MUX
+    // PC_MUX pc_mux(
+    //     .sequential_pc(sequential_pc),        // Input: Sequential PC (PC + 4)
+    //     .branch_target(branch_target),
+    //     .jump_target(jump_target),
+    //     .select(select),
+    //     .next_pc(next_pc)
+    // );
 
      // Instantiate the Control Unit
     ControlUnit control_unit(
-        .instruction(instruction),
-        .reset(Reset), // Assuming 'Reset' is a wire or reg in your testbench
-        .Cond_Mux(Cond_Mux),
-        .Jump(Jump),
-        .Branch(Branch),
-        .JalAdder(JalAdder),
-        .CMU(CMU),
-        .TaMux(TaMux),
-        .WriteDestination(WriteDestination),
-        .S0_S2(S0_S2),
-        .Base_Addr_MUX(Base_Addr_MUX),
-        .RsAddrMux(RsAddrMux),
-        .ALUOp(ALUOp),
-        .Data_Mem_RW(Data_Mem_RW),
-        .Data_Mem_Enable(Data_Mem_Enable),
-        .Data_Mem_Size(Data_Mem_Size),
-        .RegDst(RegDst),
-        .HiEnable(HiEnable),
-        .RegFileEnable(RegFileEnable),
-        .Jump_Addr_MUX_Enable(Jump_Addr_MUX_Enable),
-        .LoEnable(LoEnable),
-        .MemtoReg(MemtoReg),
-        .Load(Load)
+        .instruction(instruction_id),
+        .instr_singals(.instr)
     );
 
-
+    // ControlUnitMUX instantiation
+    ControlUnitMUX control_unit_mux_inst (
+        .S(S),
+        .control_signals_in(control_signals_from_cu),
+        .control_signals_out(control_signals_to_registers)
+    );
 
     // Instantiate the Pipeline Registers
     IF_ID_Register if_id_register(
         .clk(Clk),
         .reset(Reset),
+        .LE(LE),
         .instruction_in(instruction),
-        .pc_in(PC)
+        .instruction_out(instruction_id)
+        // .pc_in(PC)
        
     );
 
@@ -134,34 +122,34 @@ module MIPS_Pipeline_tb;
 
      // Instruction Memory
     rom_512x8 ram1 (
-        instruction, // OUT
-        PC[7:0]      // IN
+        .DataOut(instruction), // OUT
+        .Address(PC[8:0])      // IN
     );
 
     // Precharging the Instruction Memory
     initial begin
         fi = $fopen("p3.txt","r");
-        Addr = 8'b00000000;
-        // $display("Precharging Instruction Memory...\n---------------------------------------------\n");
-        while (!$feof(fi)) begin
-            
-            code = $fscanf(fi, "%b", data);
-            // $display("---- %b ----\n", data);
-            ram1.Mem[Addr] = data;
-            Addr = Addr + 1;
-        end
+            Addr = 9'b00000000;
+            // $display("Precharging Instruction Memory...\n---------------------------------------------\n");
+            while (!$feof(fi)) begin
+                
+                code = $fscanf(fi, "%b", data);
+                // $display("---- %b ----\n", data);
+                ram1.Mem[Addr] = data;
+                Addr = Addr + 1;
+            end
         $fclose(fi);
-        Addr = 8'b00000000;
+        
     end
 
     // Function to get instruction keyword
     function [63:0] get_instruction_keyword;
-        input [31:0] instruction;
+        input [31:0] instruction_id;
         reg [5:0] opcode;
         reg [5:0] func_code;
         begin
-            opcode = instruction[31:26]; // Extract the opcode
-            func_code = instruction[5:0]; // Extract the function code for R-type instructions
+            opcode = instruction_id[31:26]; // Extract the opcode
+            func_code = instruction_id[5:0]; // Extract the function code for R-type instructions
 
             case(opcode)
                 6'b001001: get_instruction_keyword = "ADDIU"; // ADDIU
@@ -171,7 +159,7 @@ module MIPS_Pipeline_tb;
                 6'b001111: get_instruction_keyword = "LUI";   // LUI
                 6'b000011: get_instruction_keyword = "JAL";   // JAL
 
-                6'b000000: begin // for R-type instructions
+                6'b000000, 6'b011100: begin // for R-type instructions
                     case(func_code)
                         6'b100011: get_instruction_keyword = "SUBU"; // SUBU
                         6'b001000: get_instruction_keyword = "JR";    // JR
@@ -202,31 +190,27 @@ module MIPS_Pipeline_tb;
         #48 $finish; // End simulation at time 48
     end
 
-    // Monitor statement for displaying required information
-
-    initial begin
-        always (posedge clk) begin
-            //fork and join dentro de un initial     
-            $display("ID - Time: %0t, Instruction Keyword: %s PC: %d, nPC: %d, ",
-                    $time, instruction_keyword, PC, nPC);
-            //EX
-            $display("EX - Time: %0t, PC: %d, nPC: %d, Instruction: %b, EX Control Signals: %b, , , , , ",
-                    $time,  /* EX control signals */);
-            //MEM
-            $display("MEM - Time: %0t, PC: %d, nPC: %d, Instruction: %b, MEM Control Signals: %b, , , , ,  ,  ",
-                    $time, /* MEM control signals */);
-            //WB
-            $display("WB - Time: %0t, PC: %d, nPC: %d, Instruction: %b, WB Control Signals: %b, , , , , , , ",
-                    $time,  /* WB control signals */);
-            
-            //if/id:
-            //id/ex: //poner señal enable de tal cosa, 
-            //ex/mem:
-            //mem/wb:
-            //4 displays apartes 
-        end
+    // Display statement for displaying required information
+    
+    always @(posedge Clk) begin
+     //Display time at the beginning of each clock cycle
+         $display("\nTime: %0t s", $time);
+        //  $display("Inst: %b | Inst_ID: %b | PC: %d|nPC: %d|",instruction[31:26],instruction_id[31:26], PC, nPC);
+     //ID stage
+         $display("ID Stage - Inst: %-6s | PC: %d | nPC: %d | Jump: %b | Branch: %b | JalAdder: %b | CMUX: %b | TaMux: %b | ALUOp: %b | Data_Mem_RW: %b | Data_Mem_Enable: %b | Data_Mem_Size: %b | Data_Mem_SE: %b | Base_Addr_MUX: %b | RsAddrMux: %b | HiEnable: %b | RegFileEnable: %b | Jump_Addr_MUX_Enable: %b | LoEnable: %b | MemtoReg: %b | Load: %b | S0-S2: %b ", 
+         get_instruction_keyword(instruction_id), PC, nPC, Jump, Branch, JalAdder, CMUX, TaMux, ALUOp, Data_Mem_RW, Data_Mem_Enable, Data_Mem_Size, Data_Mem_SE, Base_Addr_MUX, RsAddrMux, HiEnable, RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load, S0_S2);
+         $display("\n");
+     // EX stage
+         $display("EX Stage -  WriteDestination: %b | Cond_Mux: %b | Jump: %b | Branch: %b | TaMux: %b | ALUOp: %b | HiEnable: %b | LoEnable: %b | Data_Mem_RW: %b | Data_Mem_Enable: %b | Data_Mem_Size: %b | Data_Mem_SE: %b | RegFileEnable: %b | S0-S2: %b   ", WriteDestination, Cond_Mux, Jump, Branch, TaMux, ALUOp, HiEnable, LoEnable, Data_Mem_RW, Data_Mem_Enable, Data_Mem_Size,Data_Mem_SE, RegFileEnable, S0_S2 );
+         $display("\n");
+     // MEM stage
+         $display("MEM Stage - WriteDestination: %b | Data_Mem_RW: %b | Data_Mem_Enable: %b | Data_Mem_Size: %b | Data_Mem_SE: %b | MemtoReg: %b | HiEnable: %b | LoEnable: %b | RegFileEnable: %b  ", WriteDestination, Data_Mem_RW, Data_Mem_Enable, Data_Mem_Size, Data_Mem_SE, MemtoReg, HiEnable, LoEnable, RegFileEnable);
+         $display("\n");
+     // WB stage
+         $display("WB Stage - WriteDestination: %b | HiEnable: %b | RegFileEnable: %b | LoEnable: %b | MemtoReg: %b ", WriteDestination, HiEnable, RegFileEnable, LoEnable, MemtoReg);
+         $display("\n"); 
     end
 
-
-
 endmodule
+
+

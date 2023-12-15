@@ -1,47 +1,48 @@
-`timescale 1ns / 1ps
+`timescale 1s / 1s
 
 module ControlUnitMUX(
-    input S,
-    input [18:0] control_signals_in, // Input control signals
-    output reg [18:0] control_signals_out // Output control signals
+    input CMUX,
+    input [26:0] control_signals_in, // Input control signals
+    output reg [18:0] control_signals_out //  control signals
 );
 
-always @(*) begin
-    if (S == 1'b0) begin
-        control_signals_out = control_signals_in;
-    end else begin
-        control_signals_out = 18'b0; // Output zeros for all control signals
+    always @(*) begin
+        if (CMUX == 1'b0) begin
+            control_signals_out <= control_signals_in[26:0];
+        end else begin
+            control_signals_out = 26'b0; //  zeros for all control signals
+        end
     end
-end
 
 endmodule
 
 
 module ControlUnit(
     input [31:0] instruction,
-    input reset,
-    output reg Cond_Mux,           // condition check, e.g., for branches
-    output reg Jump,
-    output reg Branch,       
-    output reg JalAdder,          
-    output reg [1:0] CMU,
-    output reg TaMux,              
-    output reg [1:0] WriteDestination,  
-    output reg [2:0] S0_S2,         // Assuming this is part of ALUOp or similar control
-    output reg Base_Addr_MUX,       // This could be equivalent to something like RegFileEnable but for base address
-    output reg RsAddrMux,         
-    output reg [3:0] ALUOp, 
-    output reg Data_Mem_RW,         
-    output reg Data_Mem_Enable,     
-    output reg [1:0] Data_Mem_Size, 
-    output reg RegDst,              // Equivalent to WriteDestination, selects destination register
-    output reg HiEnable,      
-    output reg RegFileEnable,// Equivalent to RegFileEnable, enables writing to the register file
-    output reg Jump_Addr_MUX_Enable,
-    output reg LoEnable,        // Equivalent to LoEnable, enables LO register operations
-    output reg MemtoReg,
-    output reg Load           
+    output reg [26:0] instr_signals      
 );
+     reg Cond_Mux;    //1     // condition check, e.g., for branches
+     reg Jump; //2
+     reg Branch;  //3  
+     reg JalAdder;    //4   
+     reg CMUX; //5
+     reg TaMux;    //6        
+     reg [1:0] WriteDestination; //7,8 //2b01 = rd,2b10 = rt,2b11 = r31 
+     reg [2:0] S0_S2;         //9,10,11
+     reg Base_Addr_MUX;     //12  // This could be equivalent to something like RegFileEnable but for base address
+     reg RsAddrMux;         //13
+     reg [3:0] ALUOp; //14,15,16
+     reg Data_Mem_RW;        //17 
+     reg Data_Mem_Enable;  //18   
+     reg [1:0] Data_Mem_Size; //19,20
+     reg Data_Mem_SE; //21
+     reg HiEnable;     //22
+     reg RegFileEnable;//23 // Equivalent to RegFileEnable, enables writing to the register file
+     reg Jump_Addr_MUX_Enable;//24
+     reg LoEnable;    //25    // Equivalent to LoEnable, enables LO register operations
+     reg MemtoReg;    //26
+     reg Load;        //27
+
 
 // Define opcodes for the instructions
 localparam [5:0] 
@@ -108,82 +109,123 @@ localparam [4:0]
 
 
 always @(*) begin
-    // Default control signals for NOP (no operation) and all other control signals
-    ALUOp = 0;
-    Load = 0;
-    RegFileEnable = 0;
-    HiEnable = 0;
-    LoEnable = 0;
+
+    Cond_Mux = 0;
+    Jump = 0;
+    Branch = 0;
     JalAdder = 0;
+    CMUX = 1;
     TaMux = 0;
-    RsAddrMux = 0; // 1 does PC=rs, 0 passes normal TA
-    WriteDestination = 0; // 1 saves to rt, 0 saves to rd
-    RegDst = 0; // 1 saves to $r31
+    WriteDestination = 2'b00;// 3 for r31, 2 saves to rt, 1 saves to rd
+    S0_S2 = 3'b000;
+    Base_Addr_MUX = 0;
+    RsAddrMux = 0;
+    ALUOp = 4'b0000;
+    Data_Mem_RW = 0;
+    Data_Mem_Enable = 0;
+    Data_Mem_Size = 2'b00;
+    Data_Mem_SE = 0;
+    HiEnable = 0;
+    RegFileEnable = 0;
+    Jump_Addr_MUX_Enable = 0;
+    LoEnable = 0;
+    MemtoReg = 0;
+    Load = 0; 
+    instr_signals = 27'b0;
 
-
-    if (!reset) begin
         // Decode the instruction based on opcode and function code
         case (instruction[31:26]) // Check the opcode
+
             OPCODE_RTYPE, OPCODE_SPECIAL: begin
                 case (instruction[5:0]) // Check the function code for R-type instructions
-                    FUNC_ADD, FUNC_ADDU, FUNC_SUB, FUNC_SUBU,
-                    FUNC_SLT, FUNC_SLTU, FUNC_AND, FUNC_OR, 
-                    FUNC_XOR, FUNC_NOR, FUNC_SLL, FUNC_SLLV, 
-                    FUNC_SRA, FUNC_SRAV, FUNC_SRL, FUNC_SRLV: begin
-                        // ALUOp = 1;/ hacerlo para 4 bits y hacer logica correspondiente a cada
-                        // instruccion tipo R
+                    // Add cases for specific R-type instructions here
+                    FUNC_SUBU: begin
+                        ALUOp = 4'b0001; // Example ALU operation code for SUBU
                         RegFileEnable = 1;
-                        WriteDestination = 00b'0; // Select 'rd' field as the destination // cambiar a señal de 2 bis
+                        WriteDestination = 2'b11; // Writes to 'rd'
+                        S0_S2 = 3'b100; 
                     end
-                    FUNC_JR, FUNC_JALR: begin
-                        RsAddrMux = 1; // Control signal for jump register instructions
-                        RegFileEnable = 1;
-                        if (instruction[5:0] == FUNC_JALR) begin
-                            RegFileEnable = 1; // For JALR, link address is stored in register
-                            RsAddrMux = 1;
-                            WriteDestination = 0; // Select 'rd' field as the destination register.
-                            JalAdder = 1;
-                        end
+                    FUNC_JR: begin
+                        Jump = 1;
+                        RsAddrMux = 1;
+                        
                     end
                     FUNC_MFHI: begin
-                        RegFileEnable = 1;
-                        HiEnable = 1; // Move from HI register to a register file destination
-                        // Set signals for HI register read
+                        // Control signals specific to the MFHI instruction
+                        S0_S2 = 3'b001; // Select HI register
+                        
                     end
                     FUNC_MFLO: begin
-                        RegFileEnable = 1; // Move from LO register to a register file destination
-                        LoEnable = 1; // Set signals for LO register read
+                        // Control signals specific to the MFLO instruction
+                        S0_S2 = 3'b010; // Select LO register
+                        
                     end
-                    FUNC_MTHI: begin
-                        HiEnable = 1; 
-                    end    
-                    FUNC_MTLO: begin
-                        LoEnable = 1;
-                    end
-                    // ... (Other cases for MOVN, MOVZ as required)
+                    // ... (Other R-type)
                 endcase
             end
+
+            OPCODE_ADDIU: begin
+                ALUOp = 4'b0000; // Example ALU operation code for ADDIU
+                RegFileEnable = 1;
+                WriteDestination = 2'b01; // Writes to 'rt'
+                S0_S2 = 3'b100; // Select imm16 || sign extended
+            end
+            OPCODE_LBU: begin
+                ALUOp = 4'b0000; // Example ALU operation code for LBU
+                RegFileEnable = 1;
+                Load = 1;
+                WriteDestination = 2'b01; // Writes to 'rt'
+                Data_Mem_Enable = 1;
+                Data_Mem_RW = 0; //load
+                Data_Mem_Size = 2'b01;
+                Data_Mem_SE = 1; // sign_extension16 || Mem[A] || Mem[A+1]
+                S0_S2 = 3'b100; // Select imm16 || se
+            end
+            OPCODE_SB: begin
+                ALUOp = 4'b0000; // Example ALU operation code for SB
+                Data_Mem_RW = 1; //store
+                Data_Mem_Enable = 1;
+                Data_Mem_Size = 2'b01;
+                Data_Mem_SE = 0; // sign_extension16 || Mem[A] || Mem[A+1]
+                WriteDestination = 2'b01; // Writes to 'rt'
+            end
+            OPCODE_BGTZ: begin
+                ALUOp = 4'b1001; // Example ALU operation code for BGTZ
+                Branch = 1;
+                RsAddrMux = 0;
+                Base_Addr_MUX = 0;
+            end
+            OPCODE_LUI: begin
+                ALUOp = 4'b0110; // Example ALU operation code for LUI
+                RegFileEnable = 1;
+                WriteDestination = 2'b01; // Writes to 'rt'
+                S0_S2 = 3'b100; // Select imm16 || 0x0000
+            end
+            OPCODE_JAL: begin
+                Jump = 1;
+                JalAdder = 1;// PC+8 is calculated
+                RegFileEnable = 1;
+                WriteDestination = 2'b10; //r31
+                MemtoReg = 1;
+            end
+
             OPCODE_J: begin
                 // For J, no control signals are set except for those affecting the PC
             end
-            OPCODE_JAL: begin
-                RegFileEnable = 1;
-                JalAdder = 1; // PC+8 is calculated
-                RegDst = 1; // Link address is stored in $ra ($31)
-            end
+            
             // Immediate (I-type) instructions
-            OPCODE_ADDI, OPCODE_ADDIU, OPCODE_SLTI, OPCODE_SLTIU, 
-            OPCODE_ANDI, OPCODE_ORI, OPCODE_XORI, OPCODE_LUI: begin
+            OPCODE_ADDI, OPCODE_SLTI, OPCODE_SLTIU, 
+            OPCODE_ANDI, OPCODE_ORI, OPCODE_XORI: begin
                 ALUOp = 1; // ALU operation for arithmetic, logical, or immediate value calculation
                 RegFileEnable = 1; // Set for instructions that write back to a register
-                WriteDestination = 1; // Immediate instructions write to 'rt' (I-type)
+                WriteDestination = 2'b01; // Immediate instructions write to 'rt' (I-type)
             end
             // Load instructions
             OPCODE_LB, OPCODE_LH, OPCODE_LW, OPCODE_LBU, OPCODE_LHU: begin
                 ALUOp = 1; // For address calculation
                 RegFileEnable = 1; // Data from memory will be written back to the register file
                 Load = 1; // Enable signal for indicating a load from memory
-                WriteDestination = 1; // Load instructions write to 'rt' (I-type)
+                WriteDestination = 2'b01; // Load instructions write to 'rt' (I-type)
             end
             // Store instructions
             OPCODE_SB, OPCODE_SH, OPCODE_SW: begin
@@ -201,7 +243,7 @@ always @(*) begin
                     end
                     RT_BLTZAL, RT_BGEZAL: begin
                         RegFileEnable = 1; // Write back the return address for link instructions
-                        RegDst = 1; // Write to $r31 for link instructions (JAL-type)
+                        WriteDestination = 2'b10; //r31
                         JalAdder = 1;
                     end
                 endcase
@@ -211,7 +253,29 @@ always @(*) begin
                 // Handle undefined instruction or set to NOP
             end
         endcase
-    end
-end
 
+    instr_signals[0] = Cond_Mux;
+    instr_signals[1] = Jump;
+    instr_signals[2] = Branch;
+    instr_signals[3] = JalAdder;
+    instr_signals[4] = CMUX;
+    instr_signals[5] = TaMux;
+    instr_signals[7:6] = WriteDestination;
+    instr_signals[10:8] = S0_S2;
+    instr_signals[11] = Base_Addr_MUX;
+    instr_signals[12] = RsAddrMux;
+    instr_signals[15:13] = ALUOp;
+    instr_signals[16] = Data_Mem_RW;
+    instr_signals[17] = Data_Mem_Enable;
+    instr_signals[19:18] = Data_Mem_Size;
+    instr_signals[20] = Data_Mem_SE;
+    instr_signals[21] = HiEnable;
+    instr_signals[22] = RegFileEnable;
+    instr_signals[23] = Jump_Addr_MUX_Enable;
+    instr_signals[24] = LoEnable;
+    instr_signals[25] = MemtoReg;
+    instr_signals[26] = Load;
+
+    
+    end
 endmodule
