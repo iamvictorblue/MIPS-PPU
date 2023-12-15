@@ -133,6 +133,7 @@ always @(*) begin
     MemtoReg = 0;
     Load = 0; 
     instr_signals = 27'b0;
+    MEM_MUX = 0;
 
         // Decode the instruction based on opcode and function code
         case (instruction[31:26]) // Check the opcode
@@ -181,6 +182,7 @@ always @(*) begin
                 Data_Mem_Size = 2'b01;
                 Data_Mem_SE = 1; // sign_extension16 || Mem[A] || Mem[A+1]
                 S0_S2 = 3'b100; // Select imm16 || se
+                MEM_MUX = 1;
             end
             OPCODE_SB: begin
                 ALUOp = 4'b0000; // Example ALU operation code for SB
@@ -189,6 +191,7 @@ always @(*) begin
                 Data_Mem_Size = 2'b01;
                 Data_Mem_SE = 0; // sign_extension16 || Mem[A] || Mem[A+1]
                 WriteDestination = 2'b01; // Writes to 'rt'
+                MEM_MUX = 0;
             end
             OPCODE_BGTZ: begin
                 ALUOp = 4'b1001; // Example ALU operation code for BGTZ
