@@ -136,6 +136,7 @@ module EX_MEM_Register(
     input wire [31:0] EX_ALU_OUT,
     input wire [10:0] EX_control_signals_in, // Include relevant control signals from EX stage
 
+
     output reg [31:0] MEM_ALU_OUT,
     output reg [31:0] MEM_MX2,
     output reg [31:0] JalAdder_MEM,
@@ -158,11 +159,13 @@ always @(posedge clk)
         PC_MEM <= 32'b0;
         EX_MEM_control_signals <= 6'b0;
         Data_Mem_instructions <= 5'b0;
+        MEM_MUX <= 1'b0;
     end else begin
         // Copy input values to respective output registers and control signals
         MEM_ALU_OUT <= EX_ALU_OUT;
         MEM_MX2 <= EX_MX2;
         Data_Mem_instructions <= EX_control_signals_in[10:6];
+        MEM_MUX <= EX_control_signals_in[5];
         JalAdder_MEM <= JalAdder_EX;
         WriteDestination_MEM <= WriteDestination_EX;
         PC_MEM <= PC;
@@ -182,7 +185,11 @@ module MEM_WB_Register(
     output reg [31:0] MEM_OUT_WB,
     output reg [31:0] JalAdder_WB,
     output reg [4:0] WriteDestination_WB,
-    output reg [4:0] MEM_WB_control_signals// Output relevant control signals for WB stage
+    output reg  hi_enable,
+    output reg  lo_enable, 
+    output reg  RegFileEnable, // Output relevant control signals for WB stage
+    output reg  MemtoReg // Output relevant control signals for WB stage
+    
 
     
 );
@@ -193,7 +200,10 @@ always @(posedge clk)
         MEM_OUT_WB <= 32'b0;
         JalAdder_WB <= 32'b0;
         WriteDestination_WB <= 5'b0;
-        MEM_WB_control_signals <= 6'b0;
+        hi_enable <= 1'b0;
+        lo_enable <= 1'b0;
+        RegFileEnable <= 1'b0;
+        MemtoReg <= 1'b0;
 
         
     end else begin
@@ -201,7 +211,11 @@ always @(posedge clk)
         MEM_OUT_WB <= MEM_OUT_MEM;
         JalAdder_WB <= JalAdder_MEM;
         WriteDestination_WB <= WriteDestination_MEM;
-        MEM_WB_control_signals <= MEM_control_signals_in[4:0]; // Relevant signals for WB stage
+        hi_enable <= MEM_control_signals_in[4];
+        lo_enable <= MEM_control_signals_in[2];
+        RegFileEnable <= MEM_control_signals_in[3];
+        MemtoReg <= MEM_control_signals_in[1];
+
 
     end
 endmodule

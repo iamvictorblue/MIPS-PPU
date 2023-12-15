@@ -72,6 +72,7 @@ module phase4_tb;
     wire Cond_Mux, Jump, Branch, JalAdder, TaMux, Base_Addr_MUX, 
     RsAddrMux, Data_Mem_RW, Data_Mem_Enable, Data_Mem_SE, HiEnable, 
     RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load,CMUX;
+
     wire [1:0] Data_Mem_Size;
 
     wire [2:0] S0_S2;
@@ -385,7 +386,7 @@ module phase4_tb;
         .RW                             (RD_WB),
         .RA                             (rs),
         .RB                             (rt),
-        .LE                             (control_signals_out_WB[3]),
+        .LE                             (RegFileEnable),
         .Clk                            (clk)
     );
 
@@ -394,7 +395,7 @@ module phase4_tb;
     // Instantiation of HiRegister
     HiRegister hi_reg_inst (
         .clk(clk),             // Connect to clock signal
-        .HiEnable(control_signals_out_WB[4]),  // Connect to hi enable signal
+        .HiEnable(HiEnable),  // Connect to hi enable signal
         .PW(pw_signal),        // Connect to PW input signal
         .HiSignal(hi_out_signal) // Connect to output signal
     );
@@ -402,7 +403,7 @@ module phase4_tb;
     // Instantiation of LoRegister
     LoRegister lo_reg_inst (
         .clk(clk),             // Connect to clock signal
-        .LoEnable(control_signals_out_WB[2]),  // Connect to lo enable signal
+        .LoEnable(LoEnable),  // Connect to lo enable signal
         .PW(pw_signal),        // Connect to PW input signal
         .LoSignal(lo_out_signal) // Connect to output signal
     );
@@ -559,7 +560,10 @@ module phase4_tb;
         .MEM_OUT_WB(MEM_OUT_MEM),
         .JalAdder_WB(JalAdder_WB),
         .WriteDestination_WB(RD_WB),
-        .MEM_WB_control_signals(control_signals_out_WB)
+        .hi_enable(HiEnable),
+        .lo_enable(LoEnable), 
+        .RegFileEnable(RegFileEnable), // Output relevant control signals for WB stage
+        .MemtoReg(MemtoReg) 
         
     );
 
