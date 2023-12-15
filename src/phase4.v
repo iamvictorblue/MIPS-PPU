@@ -95,7 +95,7 @@ module phase4_tb;
     // Testbench signal declarations
     wire [23:0] control_signals_cu;
     wire [23:0] control_signals_cmux;
-    wire [18:0] control_signals_to_registers; 
+    wire [17:0] control_signals_to_registers; 
 
     // Outputs of Components
     wire [31:0] ALU_OUT;        // ALU Output, used for the PC/nPC system
@@ -142,7 +142,7 @@ module phase4_tb;
     wire [4:0] rs_EX, rt_EX, rd_EX;  // 5-bit signals for register addresses
     wire [10:0] control_signals_out_ID_EX;  // 19-bit signal
     wire [10:0] control_signals_out_EX_MEM;  // 19-bit signal
-    wire [4:0] control_signals_out_MEM_WB;  // 19-bit signal
+    wire [10:0] control_signals_out_MEM_WB;  // 19-bit signal
     wire [4:0] control_signals_out_WB;
     wire CC_Enable;     // Condition Code Enable
     wire [31:0] operand2_handler_out;
@@ -435,7 +435,7 @@ module phase4_tb;
         .reset(clr),
         .instruction_in(instruction),
         .PC(PC_ID),
-        .control_signals_in(control_signals_cu[15:0]),
+        .control_signals_in(control_signals_to_registers),
         .rs_ID(rs),
         .rt_ID(rt),
         .rd_ID(rd),
@@ -473,7 +473,7 @@ module phase4_tb;
         .LO(lo_out_signal),
         .PC(PC_EX),
         .imm16(imm16Handler_EX),
-        .S0_S2(control_signals_out_ID_EX[10:8]),
+        .S0_S2(control_signals_to_registers[17:15]),
         .N(operand2_handler_out)
     );
   
@@ -481,7 +481,7 @@ module phase4_tb;
     ALU alu (
         .A(EX_MX1),
         .B(operand2_handler_out),
-        .opcode(ALUOp),
+        .opcode(control_signals_to_registers[14:11]),
         .Out(ALU_OUT),
         .Z(Z)
     );
@@ -538,21 +538,21 @@ module phase4_tb;
         .JalAdder_MEM(JalAdder_MEM),
         .WriteDestination_MEM(WriteDestination_MEM),
         .PC_MEM(PC_MEM),
-        .EX_MEM_control_signals(control_signals_out_MEM_WB)
+        .EX_MEM_control_signals(control_signals_out_EX_MEM)
     );
 
     mux_2x1 MEM_MUX (
         .Y                       (MEM_OUT),
         .I0                      (MEM_ALU_OUT_Address),
         .I1                      (DataMemory_OUT),
-        .S                       (control_signals_out_MEM_WB[5])
+        .S                       (control_signals_out_ID_EX[5])
     );
     
     MEM_WB_Register mem_wb_register(
         .clk(clk),
         .reset(clr),
         .MEM_OUT_MEM(MEM_OUT),
-        .MEM_control_signals_in(control_signals_out_MEM_WB),
+        .MEM_control_signals_in(control_signals_out_EX_MEM),
         .WriteDestination_MEM(WriteDestination_MEM),
         .JalAdder_MEM(JalAdder_MEM),
 
@@ -571,7 +571,7 @@ module phase4_tb;
         .Y                       (WB_OUT),
         .I0                      (MEM_OUT),
         .I1                      (JalAdder_WB),
-        .S                       (control_signals_out_WB[1])
+        .S                       (MemtoReg)
     );
 
 

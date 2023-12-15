@@ -47,7 +47,7 @@ module ID_EX_Register(
 
     input [31:0] instruction_in,
     input [31:0] PC, // fase 4
-    input [15:0] control_signals_in, //control signals in //16 bits
+    input [17:0] control_signals_in, //control signals in //16 bits
     input wire [4:0]  rs_ID,            // rs
     input wire [4:0]  rt_ID,              // rt
     input wire [4:0]  rd_ID,
@@ -65,7 +65,7 @@ module ID_EX_Register(
 
     output reg [3:0]  EX_ALU_OP_instr,
     output reg [2:0]  EX_S02_instr,
-    output reg [10:0]  EX_control_unit_instr, //control signals out //11 bits
+    output reg [10:0] EX_control_unit_instr, //control signals out //11 bits
 
     output reg [31:0] JalAdder_EX,
     output reg [4:0] WriteDestination_EX,
@@ -100,7 +100,7 @@ always @(posedge clk)
         PC_EX <= 32'b0;
         EX_ALU_OP_instr <= 4'b0;
         EX_S02_instr <= 3'b0;
-        EX_control_unit_instr <= 17'b0;
+        EX_control_unit_instr <= 11'b0;
         EX_TA <= 32'b0;
     end else begin
         // Copy input values to respective output registers and control signals
@@ -115,8 +115,8 @@ always @(posedge clk)
         rt_EX <=  instruction_in[20:16];
         rd_EX <=  instruction_in[15:11];
         EX_TA <= ID_TA;
-        EX_ALU_OP_instr <= control_signals_in[13:11];
-        EX_S02_instr <= control_signals_in[15:14];
+        EX_ALU_OP_instr <= control_signals_in[14:11];
+        EX_S02_instr <= control_signals_in[17:15];
         EX_control_unit_instr <= control_signals_in[10:0]; //EX control signals
         PC_EX <= PC;
     end

@@ -297,15 +297,15 @@ always @(*) begin
     instr_signals[8:7] = Data_Mem_Size; // MEM Stage
     instr_signals[9] = Data_Mem_Enable;  // MEM Stage
     instr_signals[10] = Data_Mem_RW;     // MEM Stage
-    instr_signals[13:11] = ALUOp;        // EX Stage
-    instr_signals[15:14] = S0_S2;        // EX Stage
-    instr_signals[16] = RsAddrMux;       // ID
-    instr_signals[17] = Base_Addr_MUX;  // ID
-    instr_signals[19:18] = WriteDestination; // ID Stage
-    instr_signals[20] = CMUX;            // ID Stage
-    instr_signals[21] = JalAdder;        // ID Stage
-    instr_signals[22] = Jump;            // IF Stage
-    instr_signals[23] = Cond_Mux;        // IF Stage
+    instr_signals[14:11] = ALUOp;        // EX Stage
+    instr_signals[17:15] = S0_S2;        // EX Stage
+    instr_signals[18] = RsAddrMux;       // ID
+    instr_signals[19] = Base_Addr_MUX;  // ID
+    instr_signals[21:20] = WriteDestination; // ID Stage
+    instr_signals[22] = CMUX;            // ID Stage
+    instr_signals[23] = JalAdder;        // ID Stage
+    instr_signals[24] = Jump;            // IF Stage
+    instr_signals[25] = Cond_Mux;        // IF Stage
 
 
     
