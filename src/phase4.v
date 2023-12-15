@@ -29,7 +29,7 @@ module phase4_tb;
     wire [31:0] instruction_out;
 
    // Clock, Reset, and Control Signals
-    reg LE = 1;
+    
     reg clk, clr;
     reg S; // Control signal for the Control Unit MUX
 
@@ -109,7 +109,7 @@ module phase4_tb;
     wire nPC_LE;
     wire IF_ID_Pipeline_LE;
 
-    wire Reset;    // controls PC, nPC and IF/ID pipeline register
+    wire [31:0] PC_dummy;
 
     // reg cond_branch_OUT = 0; // Goes to nPC/PC handler, from condition handler
     wire cond_branch_OUT;
@@ -197,11 +197,21 @@ module phase4_tb;
 
     // nPC register
     NPC_Register npc_reg(
-        .clk(Clk),
-        .reset(Reset),
-        .load_enable(1'b1), // Assuming always enabled for simplicity
+        .clk(clk),
+        .reset(clr),
+        .load_enable(nPC_LE), // Assuming always enabled for simplicity
         .data_in(nPC4),      
         .data_out(nPC)     // Current Program Counter
+        
+    );
+
+    // PC register
+    PC_Register pc_reg(
+        .clk(clk),
+        .reset(clr),
+        .load_enable(nPC_LE), // Assuming always enabled for simplicity
+        .data_in(PC_MUX_OUT),     
+        .data_out(PC_dummy)      // Current Program Counter
         
     );
 
@@ -219,15 +229,7 @@ module phase4_tb;
         .Q          (PC_MUX_OUT)
     );
 
-    // PC register
-    PC_Register pc_reg(
-        .clk(Clk),
-        .reset(Reset),
-        .load_enable(1'b1), // Assuming always enabled for simplicity
-        .data_in(PC_MUX_OUT),     
-        .data_out(PC)      // Current Program Counter
-        
-    );
+    
 
     // Instruction Memory
     rom_512x8 ROM (
@@ -266,14 +268,15 @@ module phase4_tb;
     end
 
 
-    // // Clock generator
+    // Clock generator
     initial begin
         clr <= 1'b1;
         clk <= 1'b0;
-        #2 clk <= ~clk;
-        #1 clr <= 1'b0;
-        #1 clk <= ~clk; 
         forever #2 clk = ~clk;
+    end
+
+    initial begin
+        #3 clr <= 1'b0;
     end
 
     // -|-|-|-|-|-|-|-|----- I D  S T A G E -----|-|-|-|-|-|-|-|- //
@@ -282,7 +285,7 @@ module phase4_tb;
         .clk(Clk),
         .reset(Reset),
         .instruction_in(instruction),
-        .PC(PC),
+        .PC(PC_dummy),
         .LE(LE),
         .instruction_out(instruction_id),
         .pc_out(PC_ID),
@@ -319,7 +322,7 @@ module phase4_tb;
     adder32Bit adder32Bit (
         .out (TA),
         .a   (Base_Addr_A),
-        .b   (PC)
+        .b   (PC_ID)
     );
     
     
@@ -429,7 +432,7 @@ module phase4_tb;
         .lo_signal_EX(lo_signal_EX),
         .imm16Handler_EX(imm16Handler_EX),
         .EX_MX1(EX_MX1),
-        .EX_MX2(EX_MX2),
+        .EX_MX2(pb),
         .rs_EX(rs_EX),
         .rt_EX(rt_EX),
         .rd_EX(rd_EX),
@@ -499,7 +502,7 @@ module phase4_tb;
     EX_MEM_Register ex_mem_register(
         .clk(Clk),
         .reset(Reset),
-        .PC_EX(PC_EX),
+        .PC(PC_EX),
         .control_signals_in(control_signals_out_EX_MEM), // Connect only the relevant 10 bits
         .WriteDestination_EX(WriteDestination_EX),
         .JalAdder_EX(JalAdder_EX),
@@ -581,15 +584,22 @@ module phase4_tb;
     // end
   // Test vector application
     initial begin
-        $display("|TIME: %d| PC: %d|  R5: %d| R6: %d| R16: %d | R17: %d| R18: %d",
-        $time,PC,register_file.Q5, register_file.Q6, register_file.Q16, register_file.Q17, register_file.Q18);
+        #100;
+        $display("\n----------------------------------------------------------\nSimmulation Complete!");
+        $finish;
+    end 
+
+    // initial begin
+    //     $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d | Clr: %b | PC_MUX_OUT: %d |  R5: %d| R6: %d| R16: %d | R17: %d| R18: %d",
+    //     $time,clk, PC_dummy, nPC, clr, PC_MUX_OUT, register_file.Q5, register_file.Q6, register_file.Q16, register_file.Q17, register_file.Q18);
+        
+    // end
+    initial begin
+        $monitor("|TIME: %d|Clk: %b | PC_dummy: %d|ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
+        $time,clk, PC_dummy, pa , pb ,ALU_OUT );
         
     end
     
-    initial begin
-        #90;
-        $display("---------->>>>>> LOC 59", RAM.Mem[59]);
-    end
 
 
 endmodule

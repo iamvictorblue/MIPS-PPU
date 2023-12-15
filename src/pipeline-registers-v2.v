@@ -103,7 +103,7 @@ always @(posedge clk)
         rs_EX <= instruction_in[25:21];   
         rt_EX <=  instruction_in[20:16];
         rd_EX <=  instruction_in[15:11];
-        EX_Data_MEM_instr     <= control_signals_in[20:16];
+
         EX_ALU_OP_instr       <= control_signals_in[15:13];
         EX_control_unit_instr <= control_signals_in[12:0];
         //...
@@ -117,12 +117,13 @@ endmodule
 module EX_MEM_Register(
     input clk,
     input reset,
-    input wire [31:0] PC_EX,
+    input wire [31:0] PC,
     input wire [4:0] WriteDestination_EX,
     input wire [31:0] JalAdder_EX,
     input wire [31:0] EX_MX2,
     input wire [31:0] EX_ALU_OUT,
     input wire [9:0] control_signals_in, 
+
     output reg [31:0] MEM_ALU_OUT,
     output reg [31:0] MEM_MX2,
     output reg [31:0] JalAdder_MEM,
@@ -145,10 +146,10 @@ always @(posedge clk)
         // Copy input values to respective output registers and control signals
         MEM_ALU_OUT <= EX_ALU_OUT;
         MEM_MX2 <= EX_MX2;
-        Data_Mem_instructions <= EX_Data_MEM_instr[4:0];
+        Data_Mem_instructions <= control_signals_in[20:16];
         JalAdder_MEM <= JalAdder_EX;
         WriteDestination_MEM <= WriteDestination_EX;
-        PC_MEM <= PC_EX;
+        PC_MEM <= PC;
         control_signals_out <= control_signals_in;
     end
 endmodule

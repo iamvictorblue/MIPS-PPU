@@ -27,8 +27,8 @@ module hazard_forwarding_unit (
 
     always @* begin
         /*//FORWARDING PA (ID_mux1)\\*/
-        if (EX_Register_File_Enable && (operandA == EX_RD))           // EX forwarding
-            forwardMX1 <= 2'b01;   
+        if (EX_Register_File_Enable && (operandA == EX_RD))         // EX forwarding
+                forwardMX1 <= 2'b01;   
             else if (MEM_Register_File_Enable && (operandA == MEM_RD))    // MEM forwarding
                 forwardMX1 <= 2'b10; 
             else if (WB_Register_File_Enable && (operandA == WB_RD)) 

@@ -39,7 +39,6 @@ module PC_Register(
     input load_enable,
     input [31:0] data_in,
     output reg [31:0] data_out
-
 );
     always @(posedge clk) begin
         if (reset) data_out <= 32'd0;
