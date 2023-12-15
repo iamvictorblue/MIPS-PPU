@@ -527,7 +527,7 @@ module phase4_tb;
         .clk(clk),
         .reset(clr),
         .PC(PC_EX),
-        .EX_control_signals_in(control_signals_out_EX_MEM), // Connect only the relevant 10 bits
+        .EX_control_signals_in(control_signals_out_ID_EX), // Connect only the relevant 10 bits
         .WriteDestination_EX(WriteDestination_EX),
         .JalAdder_EX(JalAdder_EX),
         .EX_MX2(EX_MX2),

@@ -3,14 +3,14 @@
 module ControlUnitMUX(
     input CMUX,
     input [23:0] control_signals_in, // Input control signals
-    output reg [15:0] control_signals_out //  control signals
+    output reg [23:0] control_signals_out //  control signals
 );
 
     always @(*) begin
-        if (CMUX == 1'b0) begin
-            control_signals_out <= control_signals_in[26:0];
+        if (CMUX == 1'b1) begin
+            control_signals_out <= control_signals_in[23:0];
         end else begin
-            control_signals_out = 26'b0; //  zeros for all control signals
+            control_signals_out = 24'b0; //  zeros for all control signals
         end
     end
 
