@@ -247,10 +247,10 @@ module phase4_tb;
     // Data Memory
     ram_512x8 RAM (
         .DataOut                        (DataMemory_OUT),
-        .SignExtend                     (DataMemInstructions[0]),   
-        .ReadWrite                      (DataMemInstructions[1]),      
-        .Enable                         (DataMemInstructions[2]), 
-        .Size                           (DataMemInstructions[4:3]),
+        .SignExtend                     (control_signals_out_MEM_WB[6]),   
+        .ReadWrite                      (control_signals_out_MEM_WB[10]),      
+        .Enable                         (control_signals_out_MEM_WB[9]), 
+        .Size                           (control_signals_out_MEM_WB[8:7]),
         .Address                        (MEM_ALU_OUT_Address[7:0]),
         .DataIn                         (MEM_MX2)
     );
@@ -258,7 +258,7 @@ module phase4_tb;
 
      // Precharging the Instruction Memory
     initial begin
-        fi = $fopen("p3.txt","r");
+        fi = $fopen("p4.txt","r");
         Addr = 9'b00000000;
         // $display("Precharging Instruction Memory...\n---------------------------------------------\n");
         while (!$feof(fi)) begin
@@ -383,7 +383,7 @@ module phase4_tb;
         .PA                             (pa),
         .PB                             (pb),
         .PW                             (WB_OUT),
-        .RW                             (RD_WB),
+        .RW                             (WriteDestination_WB),
         .RA                             (rs),
         .RB                             (rt),
         .LE                             (RegFileEnable),
@@ -559,7 +559,7 @@ module phase4_tb;
         //output
         .MEM_OUT_WB(MEM_OUT_MEM),
         .JalAdder_WB(JalAdder_WB),
-        .WriteDestination_WB(RD_WB),
+        .WriteDestination_WB(WriteDestination_WB),
         .hi_enable(HiEnable),
         .lo_enable(LoEnable), 
         .RegFileEnable(RegFileEnable), // Output relevant control signals for WB stage
@@ -656,7 +656,7 @@ module phase4_tb;
         // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
         // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
         // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
-            $monitor("|Time: %d| control_signals_cu: %b| PC: %d|", $time, control_signals_cu, PC_dummy);
+            $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d|", $time, control_signals_cu, PC_dummy, WriteDestination_WB);
     end
     
 
