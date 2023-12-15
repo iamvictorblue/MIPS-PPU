@@ -72,7 +72,7 @@ module phase4_tb;
     wire Cond_Mux, Jump, Branch, JalAdder, TaMux, Base_Addr_MUX, 
     RsAddrMux, Data_Mem_RW, Data_Mem_Enable, Data_Mem_SE, HiEnable, 
     RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load,CMUX;
-    wire [1:0] WriteDestination_MUX, Data_Mem_Size;
+    wire [1:0] Data_Mem_Size;
     wire [2:0] S0_S2;
     wire [3:0] ALUOp;
 
@@ -358,6 +358,14 @@ module phase4_tb;
        
     );
 
+    mux_3x1_wd WriteDestination_MUX(
+        .Y                       (ID_TA),
+        .I0                      (rs),
+        .I1                      (rt),
+        .I2                      (5'd31),
+        .S                       (control_signals_from_cu[7:6])
+    );
+
     // Register File, saves operand and destiny registers
     RegisterFile register_file (
         .PA                             (pa),
@@ -369,6 +377,8 @@ module phase4_tb;
         .LE                             (WB_Register_File_Enable),
         .Clk                            (clk)
     );
+
+    
 
     // Instantiation of HiRegister
     HiRegister hi_reg_inst (
