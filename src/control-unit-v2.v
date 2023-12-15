@@ -155,11 +155,13 @@ always @(*) begin
                     FUNC_MFHI: begin
                         // Control signals specific to the MFHI instruction
                         S0_S2 = 3'b001; // Select HI register
+                        HiEnable = 1;
                         
                     end
                     FUNC_MFLO: begin
                         // Control signals specific to the MFLO instruction
                         S0_S2 = 3'b010; // Select LO register
+                        LoEnable = 1;
                         
                     end
                     // ... (Other R-type)
@@ -243,7 +245,12 @@ always @(*) begin
                 // No need to enable RegFileEnable, WriteDestination, or Load for branch instructions
                 case (instruction[20:16]) // Additional case for REGIMM instructions
                     RT_BLTZ, RT_BGEZ: begin
-                        // Set control signals for BLTZ and BGEZ
+                        
+                        // Set ALUOp for branch condition check, might need a specific operation
+                         // Set appropriate ALU operation code
+                        // If needed for selecting the source register for ALU
+                        // Ensure other control signals like Data_Mem_RW, WriteDestination are not set
+                        //...
                     end
                     RT_BLTZAL, RT_BGEZAL: begin
                         RegFileEnable = 1; // Write back the return address for link instructions
