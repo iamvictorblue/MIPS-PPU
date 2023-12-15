@@ -142,6 +142,7 @@ module phase4_tb;
     wire [10:0] control_signals_out_ID_EX;  // 19-bit signal
     wire [10:0] control_signals_out_EX_MEM;  // 19-bit signal
     wire [4:0] control_signals_out_MEM_WB;  // 19-bit signal
+    wire [4:0] control_signals_out_WB;
     wire CC_Enable;     // Condition Code Enable
     wire [31:0] operand2_handler_out;
 
@@ -384,7 +385,7 @@ module phase4_tb;
         .RW                             (RD_WB),
         .RA                             (rs),
         .RB                             (rt),
-        .LE                             (control_signals_out_MEM_WB[3]),
+        .LE                             (control_signals_out_WB[3]),
         .Clk                            (clk)
     );
 
@@ -393,7 +394,7 @@ module phase4_tb;
     // Instantiation of HiRegister
     HiRegister hi_reg_inst (
         .clk(clk),             // Connect to clock signal
-        .HiEnable(control_signals_out_MEM_WB[4]),  // Connect to hi enable signal
+        .HiEnable(control_signals_out_WB[4]),  // Connect to hi enable signal
         .PW(pw_signal),        // Connect to PW input signal
         .HiSignal(hi_out_signal) // Connect to output signal
     );
@@ -401,7 +402,7 @@ module phase4_tb;
     // Instantiation of LoRegister
     LoRegister lo_reg_inst (
         .clk(clk),             // Connect to clock signal
-        .LoEnable(control_signals_out_MEM_WB[2]),  // Connect to lo enable signal
+        .LoEnable(control_signals_out_WB[2]),  // Connect to lo enable signal
         .PW(pw_signal),        // Connect to PW input signal
         .LoSignal(lo_out_signal) // Connect to output signal
     );
@@ -543,7 +544,7 @@ module phase4_tb;
         .Y                       (MEM_OUT),
         .I0                      (MEM_ALU_OUT_Address),
         .I1                      (DataMemory_OUT),
-        .S                       (MEM_MUX)
+        .S                       (control_signals_out_MEM_WB[5])
     );
     
     MEM_WB_Register mem_wb_register(
@@ -558,7 +559,7 @@ module phase4_tb;
         .MEM_OUT_WB(MEM_OUT_MEM),
         .JalAdder_WB(JalAdder_WB),
         .WriteDestination_WB(RD_WB),
-        .MEM_WB_control_signals(control_signals_out_MEM_WB[4:0])
+        .MEM_WB_control_signals(control_signals_out_WB)
         
     );
 
@@ -566,7 +567,7 @@ module phase4_tb;
         .Y                       (WB_OUT),
         .I0                      (MEM_OUT),
         .I1                      (JalAdder_WB),
-        .S                       ()
+        .S                       (control_signals_out_WB[1])
     );
 
 
