@@ -94,7 +94,7 @@ module phase4_tb;
 
     // Testbench signal declarations
     wire [23:0] control_signals_cu;
-    wire [15:0] control_signals_from_cu; 
+    wire [23:0] control_signals_cmux;
     wire [18:0] control_signals_to_registers; 
 
     // Outputs of Components
@@ -360,7 +360,7 @@ module phase4_tb;
     ControlUnitMUX control_unit_mux_inst (
         .CMUX(control_signals_cu[20]),
         .control_signals_in(control_signals_cu),
-        .control_signals_out(control_signals_from_cu)
+        .control_signals_out(control_signals_cmux)
     );
 
     reset_handler reset_handler (
@@ -435,7 +435,7 @@ module phase4_tb;
         .reset(clr),
         .instruction_in(instruction),
         .PC(PC_ID),
-        .control_signals_in(control_signals_from_cu),
+        .control_signals_in(control_signals_cu[15:0]),
         .rs_ID(rs),
         .rt_ID(rt),
         .rd_ID(rd),
@@ -473,7 +473,7 @@ module phase4_tb;
         .LO(lo_out_signal),
         .PC(PC_EX),
         .imm16(imm16Handler_EX),
-        .S0_S2(control_signals_from_cu[10:8]),
+        .S0_S2(control_signals_out_ID_EX[10:8]),
         .N(operand2_handler_out)
     );
   
@@ -656,7 +656,7 @@ module phase4_tb;
         // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
         // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
         // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
-            $monitor("|Time: %d| CMUX: %b| PC: %d|", $time, control_signals_cu[20], PC_dummy);
+            $monitor("|Time: %d| control_signals_cu: %b| PC: %d|", $time, control_signals_cu, PC_dummy);
     end
     
 
