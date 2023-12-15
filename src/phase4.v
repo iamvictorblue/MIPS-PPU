@@ -656,7 +656,7 @@ module phase4_tb;
         // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
         // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
         // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
-            $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d|", $time, control_signals_cu, PC_dummy, WriteDestination_WB);
+            $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d| CU_signals_MEM: %b|", $time, control_signals_cu, PC_dummy, WriteDestination_WB,control_signals_out_MEM_WB);
     end
     
 
