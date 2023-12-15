@@ -73,6 +73,7 @@ module phase4_tb;
     RsAddrMux, Data_Mem_RW, Data_Mem_Enable, Data_Mem_SE, HiEnable, 
     RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load,CMUX;
     wire [1:0] Data_Mem_Size;
+
     wire [2:0] S0_S2;
     wire [3:0] ALUOp;
 
@@ -91,7 +92,8 @@ module phase4_tb;
 
 
     // Testbench signal declarations
-    wire [26:0] control_signals_from_cu; 
+    wire [23:0] control_signals_cu;
+    wire [15:0] control_signals_from_cu; 
     wire [18:0] control_signals_to_registers; 
 
     // Outputs of Components
@@ -137,8 +139,8 @@ module phase4_tb;
     wire [31:0] hi_signal_EX, lo_signal_EX;
     wire [15:0] imm16Handler_EX;  // 16-bit signal
     wire [4:0] rs_EX, rt_EX, rd_EX;  // 5-bit signals for register addresses
-    wire [19:0] control_signals_out_ID_EX;  // 19-bit signal
-    wire [9:0] control_signals_out_EX_MEM;  // 19-bit signal
+    wire [10:0] control_signals_out_ID_EX;  // 19-bit signal
+    wire [10:0] control_signals_out_EX_MEM;  // 19-bit signal
     wire [4:0] control_signals_out_MEM_WB;  // 19-bit signal
     wire CC_Enable;     // Condition Code Enable
     wire [31:0] operand2_handler_out;
@@ -176,6 +178,7 @@ module phase4_tb;
     wire [31:0] MEM_ALU_OUT_Address;
     wire [31:0] DataMemory_OUT;
     wire [4:0] WriteDestination_MEM;
+    wire [31:0] MEM_OUT_MEM;
 
 
     //  WB Stage
@@ -312,7 +315,7 @@ module phase4_tb;
         .Y                       (Base_Addr_SE),
         .I0                      (imm16_SE),
         .I1                      (addr26_SE),
-        .S                       (Base_Addr_MUX)
+        .S                       (control_signals_cu[17])
     );
 
     multiplierBy4 multiplierBy4 (
@@ -329,14 +332,15 @@ module phase4_tb;
     adder32Bit_jal adder32Bit_jal (
         .out (JalAdder_ID),
         .a   (PC_ID),
-        .b   (4'd8)
+        .b   (4'd8),
+        .S   (control_signals_cu[21])
     );
     
     mux_2x1 RS_Addr_MUX (
         .Y                       (ID_TA),
         .I0                      (TA),
         .I1                      (pa),
-        .S                       (RsAddrMux)
+        .S                       (control_signals_cu[16])
     );
 
     mux_2x1 TA_MUX(
@@ -348,13 +352,13 @@ module phase4_tb;
 
     ControlUnit control_unit(
         .instruction(instruction_id),
-        .instr_signals(control_signals_from_cu)
+        .instr_signals(control_signals_cu)
     );
 
     ControlUnitMUX control_unit_mux_inst (
-        .CMUX(control_signals_from_cu[4]),
-        .control_signals_in(control_signals_from_cu),
-        .control_signals_out(control_signals_to_registers)
+        .CMUX(control_signals_cu[20]),
+        .control_signals_in(control_signals_cu),
+        .control_signals_out(control_signals_from_cu)
     );
 
     reset_handler reset_handler (
@@ -369,7 +373,7 @@ module phase4_tb;
         .I0                      (rs),
         .I1                      (rt),
         .I2                      (5'd31),
-        .S                       (control_signals_from_cu[7:6])
+        .S                       (control_signals_cu[19:18])
     );
 
     // Register File, saves operand and destiny registers
@@ -389,7 +393,7 @@ module phase4_tb;
     // Instantiation of HiRegister
     HiRegister hi_reg_inst (
         .clk(clk),             // Connect to clock signal
-        .HiEnable(hi_enable),  // Connect to hi enable signal
+        .HiEnable(control_signals_out_MEM_WB[4]),  // Connect to hi enable signal
         .PW(pw_signal),        // Connect to PW input signal
         .HiSignal(hi_out_signal) // Connect to output signal
     );
@@ -397,7 +401,7 @@ module phase4_tb;
     // Instantiation of LoRegister
     LoRegister lo_reg_inst (
         .clk(clk),             // Connect to clock signal
-        .LoEnable(lo_enable),  // Connect to lo enable signal
+        .LoEnable(control_signals_out_MEM_WB[2]),  // Connect to lo enable signal
         .PW(pw_signal),        // Connect to PW input signal
         .LoSignal(lo_out_signal) // Connect to output signal
     );
@@ -456,7 +460,7 @@ module phase4_tb;
         .rd_EX(rd_EX),
         .EX_TA(TA),
         .PC_EX(PC_EX),
-        .control_signals_out(control_signals_out_ID_EX)
+        .EX_control_unit_instr(control_signals_out_ID_EX)
     
     );
 
@@ -521,17 +525,18 @@ module phase4_tb;
         .clk(clk),
         .reset(clr),
         .PC(PC_EX),
-        .control_signals_in(control_signals_out_EX_MEM), // Connect only the relevant 10 bits
+        .EX_control_signals_in(control_signals_out_EX_MEM), // Connect only the relevant 10 bits
         .WriteDestination_EX(WriteDestination_EX),
         .JalAdder_EX(JalAdder_EX),
         .EX_MX2(EX_MX2),
         .EX_ALU_OUT(ALU_OUT),
+
         .MEM_ALU_OUT(MEM_ALU_OUT_Address),
         .MEM_MX2(MEM_MX2),
         .JalAdder_MEM(JalAdder_MEM),
         .WriteDestination_MEM(WriteDestination_MEM),
         .PC_MEM(PC_MEM),
-        .control_signals_out(control_signals_out_MEM_WB)
+        .EX_MEM_control_signals(control_signals_out_MEM_WB)
     );
 
     mux_2x1 MEM_MUX (
@@ -544,13 +549,16 @@ module phase4_tb;
     MEM_WB_Register mem_wb_register(
         .clk(clk),
         .reset(clr),
-        .control_signals_in(control_signals_out_MEM_WB),
-        .MEM_MUX(MEM_MUX),
+        .MEM_OUT_MEM(MEM_OUT),
+        .MEM_control_signals_in(control_signals_out_MEM_WB),
         .WriteDestination_MEM(WriteDestination_MEM),
         .JalAdder_MEM(JalAdder_MEM),
-        .MEM_OUT(MEM_OUT),
+
+        //output
+        .MEM_OUT_WB(MEM_OUT_MEM),
         .JalAdder_WB(JalAdder_WB),
-        .WriteDestination_WB(RD_WB)
+        .WriteDestination_WB(RD_WB),
+        .MEM_WB_control_signals(control_signals_out_MEM_WB[4:0])
         
     );
 
@@ -558,7 +566,7 @@ module phase4_tb;
         .Y                       (WB_OUT),
         .I0                      (MEM_OUT),
         .I1                      (JalAdder_WB),
-        .S                       (control_signals_from_cu[25])
+        .S                       ()
     );
 
 
@@ -641,8 +649,9 @@ module phase4_tb;
     initial begin
         // $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d| ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
         // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
-        $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
-        $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
+        // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
+        // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
+            $monitor("|Time: %d| CMUX: %b| PC: %d|", $time, control_signals_cu[20], PC_dummy);
     end
     
 

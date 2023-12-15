@@ -85,10 +85,12 @@ endmodule
 
 module adder32Bit_jal (
     output reg [31:0] out,
+    input S,
     input [31:0] a,
     input [3:0] b
+    
 );
-    always @* begin
+    always @(S) begin
         out <= a + b;
     end
 endmodule

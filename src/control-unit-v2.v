@@ -2,8 +2,8 @@
 
 module ControlUnitMUX(
     input CMUX,
-    input [26:0] control_signals_in, // Input control signals
-    output reg [18:0] control_signals_out //  control signals
+    input [23:0] control_signals_in, // Input control signals
+    output reg [15:0] control_signals_out //  control signals
 );
 
     always @(*) begin
@@ -19,7 +19,7 @@ endmodule
 
 module ControlUnit(
     input [31:0] instruction,
-    output reg [26:0] instr_signals      
+    output reg [23:0] instr_signals      
 );
      reg Cond_Mux;    //1     // condition check, e.g., for branches
      reg Jump; //2
@@ -41,7 +41,8 @@ module ControlUnit(
      reg Jump_Addr_MUX_Enable;//24
      reg LoEnable;    //25    // Equivalent to LoEnable, enables LO register operations
      reg MemtoReg;    //26
-     reg Load;        //27
+     reg Load;   
+     reg MEM_MUX;     //27
 
 
 // Define opcodes for the instructions
@@ -254,27 +255,48 @@ always @(*) begin
             end
         endcase
 
-    instr_signals[0] = Cond_Mux;
-    instr_signals[1] = Jump;
-    instr_signals[2] = Branch;
-    instr_signals[3] = JalAdder;
-    instr_signals[4] = CMUX;
-    instr_signals[5] = TaMux;
-    instr_signals[7:6] = WriteDestination;
-    instr_signals[10:8] = S0_S2;
-    instr_signals[11] = Base_Addr_MUX;
-    instr_signals[12] = RsAddrMux;
-    instr_signals[15:13] = ALUOp;
-    instr_signals[16] = Data_Mem_RW;
-    instr_signals[17] = Data_Mem_Enable;
-    instr_signals[19:18] = Data_Mem_Size;
-    instr_signals[20] = Data_Mem_SE;
-    instr_signals[21] = HiEnable;
-    instr_signals[22] = RegFileEnable;
-    instr_signals[23] = Jump_Addr_MUX_Enable;
-    instr_signals[24] = LoEnable;
-    instr_signals[25] = MemtoReg;
-    instr_signals[26] = Load;
+    // instr_signals[0] = Cond_Mux;
+    // instr_signals[1] = Jump;
+    // instr_signals[2] = Branch;
+    // instr_signals[3] = JalAdder;
+    // instr_signals[4] = CMUX;
+    // instr_signals[5] = TaMux;
+    // instr_signals[7:6] = WriteDestination;
+    // instr_signals[10:8] = S0_S2;
+    // instr_signals[11] = Base_Addr_MUX;
+    // instr_signals[12] = RsAddrMux;
+    // instr_signals[15:13] = ALUOp;
+    // instr_signals[16] = Data_Mem_RW;
+    // instr_signals[17] = Data_Mem_Enable;
+    // instr_signals[19:18] = Data_Mem_Size;
+    // instr_signals[20] = Data_Mem_SE;
+    // instr_signals[21] = HiEnable;
+    // instr_signals[22] = RegFileEnable;
+    // instr_signals[23] = Jump_Addr_MUX_Enable;
+    // instr_signals[24] = LoEnable;
+    // instr_signals[25] = MemtoReg;
+    // instr_signals[26] = Load;
+
+    instr_signals[0] = Load;             // WB Stage
+    instr_signals[1] = MemtoReg;         // WB Stage
+    instr_signals[2] = LoEnable;         // WB Stage
+    instr_signals[3] = RegFileEnable;    // WB Stage
+    instr_signals[4] = HiEnable;         // WB Stage
+    instr_signals[5] = MEM_MUX;      // MEM Stage
+    instr_signals[6] = Data_Mem_SE;      // MEM Stage
+    instr_signals[8:7] = Data_Mem_Size; // MEM Stage
+    instr_signals[9] = Data_Mem_Enable;  // MEM Stage
+    instr_signals[10] = Data_Mem_RW;     // MEM Stage
+    instr_signals[13:11] = ALUOp;        // EX Stage
+    instr_signals[15:14] = S0_S2;        // EX Stage
+    instr_signals[16] = RsAddrMux;       // ID
+    instr_signals[17] = Base_Addr_MUX;  // ID
+    instr_signals[19:18] = WriteDestination; // ID Stage
+    instr_signals[20] = CMUX;            // ID Stage
+    instr_signals[21] = JalAdder;        // ID Stage
+    instr_signals[22] = Jump;            // IF Stage
+    instr_signals[23] = Cond_Mux;        // IF Stage
+
 
     
     end
