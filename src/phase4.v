@@ -324,7 +324,12 @@ module phase4_tb;
         .a   (Base_Addr_A),
         .b   (PC_ID)
     );
-    
+
+    adder32Bit_jal adder32Bit_jal (
+        .out (JalAdder_ID),
+        .a   (PC_ID),
+        .b   (4'd8)
+    );
     
     mux_2x1 RS_Addr_MUX (
         .Y                       (ID_TA),
@@ -524,8 +529,15 @@ module phase4_tb;
         .WriteDestination_MEM(WriteDestination_MEM),
         .PC_MEM(PC_MEM),
         .control_signals_out(control_signals_out_MEM_WB)
-);
+    );
 
+    mux_2x1 MEM_MUX (
+        .Y                       (MEM_OUT),
+        .I0                      (MEM_ALU_OUT_Address),
+        .I1                      (DataMemory_OUT),
+        .S                       (MEM_MUX)
+    );
+    
     MEM_WB_Register mem_wb_register(
         .clk(clk),
         .reset(clr),
@@ -538,6 +550,15 @@ module phase4_tb;
         .WriteDestination_WB(RD_WB)
         
     );
+
+    mux_2x1 MemtoReg_MUX (
+        .Y                       (WB_OUT),
+        .I0                      (MEM_OUT),
+        .I1                      (JalAdder_WB),
+        .S                       (control_signals_from_cu[25])
+    );
+
+
 
     // initial begin
     //     $monitor($time, " PC=%d, DataAddress=%d", PC, instruction);

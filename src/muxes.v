@@ -50,6 +50,7 @@ module mux_2x1_base_addr (
     end
 endmodule
 
+
 module mux_2x5 (
     input [4:0] I0,
     input [4:0] I1,
@@ -76,6 +77,16 @@ module adder32Bit (
     output reg [31:0] out,
     input [31:0] a,
     input [31:0] b
+);
+    always @* begin
+        out <= a + b;
+    end
+endmodule
+
+module adder32Bit_jal (
+    output reg [31:0] out,
+    input [31:0] a,
+    input [3:0] b
 );
     always @* begin
         out <= a + b;
