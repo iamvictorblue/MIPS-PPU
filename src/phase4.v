@@ -141,6 +141,7 @@ module phase4_tb;
     wire [9:0] control_signals_out_EX_MEM;  // 19-bit signal
     wire [4:0] control_signals_out_MEM_WB;  // 19-bit signal
     wire CC_Enable;     // Condition Code Enable
+    wire [31:0] operand2_handler_out;
 
     // Multiplexer Output (EX)
     wire [31:0] EX_MX1;
@@ -433,8 +434,8 @@ module phase4_tb;
         .rt_ID(rt),
         .rd_ID(rd),
         .ID_TA(ID_TA),
-        .hi_signal_ID(hi_signal_ID),
-        .lo_signal_ID(lo_signal_ID),
+        .hi_signal_ID(hi_out_signal),
+        .lo_signal_ID(lo_out_signal),
         .imm16Handler_ID(imm16Handler_ID),
         .ID_MX1(ID_MX1),
         .ID_MX2(ID_MX2),
@@ -446,32 +447,34 @@ module phase4_tb;
         .hi_signal_EX(hi_signal_EX),
         .lo_signal_EX(lo_signal_EX),
         .imm16Handler_EX(imm16Handler_EX),
+
         .EX_MX1(EX_MX1),
-        .EX_MX2(pb),
+        .EX_MX2(EX_MX2),
+
         .rs_EX(rs_EX),
         .rt_EX(rt_EX),
         .rd_EX(rd_EX),
         .EX_TA(TA),
-        .PC_EX(PC),
+        .PC_EX(PC_EX),
         .control_signals_out(control_signals_out_ID_EX)
     
     );
 
     // Operand2 Handler instantiation
     Operand2_Handler uut (
-        .PB(pb),
+        .PB(EX_MX2),
         .HI(hi_out_signal),
         .LO(lo_out_signal),
         .PC(PC_EX),
         .imm16(imm16Handler_EX),
-        .S0_S2(S0_S2),
-        .N(pb)
+        .S0_S2(control_signals_from_cu[10:8]),
+        .N(operand2_handler_out)
     );
   
     // ALU instantiation
     ALU alu (
         .A(EX_MX1),
-        .B(EX_MX2),
+        .B(operand2_handler_out),
         .opcode(ALUOp),
         .Out(ALU_OUT),
         .Z(Z)
@@ -596,10 +599,10 @@ module phase4_tb;
    
    
 
-    // initial begin
-    //     #90;
-    //     $display("---------->>>>>> LOC 59", RAM.Mem[59]);
-    // end
+    initial begin
+        #90;
+        $display("---------->>>>>> LOC 52", RAM.Mem[52]);
+    end
     // Clock generation (for simulation)
     // always begin
     //     #2 clk = ~clk;
@@ -614,6 +617,16 @@ module phase4_tb;
     // #37 S = 1;
     // end
   // Test vector application
+
+    // initial begin
+        
+    //     $dumpfile("test.vcd"); // pass this to GTK Wave to visualize better wtf is going on
+    //     $dumpvars(0, phase4_tb);
+    //     #100;
+    //     $display("\n----------------------------------------------------------\nSimmulation Complete!");
+    //     $finish;
+    // end
+
     initial begin
         #100;
         $display("\n----------------------------------------------------------\nSimmulation Complete!");
@@ -626,9 +639,10 @@ module phase4_tb;
         
     // end
     initial begin
-        $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d| ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
-        $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
-        
+        // $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d| ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
+        // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
+        $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
+        $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
     end
     
 
