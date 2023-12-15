@@ -14,7 +14,7 @@ always @ (S, I0, I1, I2, I3)
 endmodule
 
 module mux_3x1_wd  (
-    output reg [31:0] Y,
+    output reg [4:0] Y,
     input [1:0] S, 
     input [4:0] I0, I1, I2
 );

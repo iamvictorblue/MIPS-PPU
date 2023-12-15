@@ -346,7 +346,7 @@ module phase4_tb;
     );
 
     ControlUnitMUX control_unit_mux_inst (
-        .CMUX(CMUX),
+        .CMUX(control_signals_from_cu[4]),
         .control_signals_in(control_signals_from_cu),
         .control_signals_out(control_signals_to_registers)
     );
@@ -359,7 +359,7 @@ module phase4_tb;
     );
 
     mux_3x1_wd WriteDestination_MUX(
-        .Y                       (ID_TA),
+        .Y                       (WriteDestination_ID),
         .I0                      (rs),
         .I1                      (rt),
         .I2                      (5'd31),
