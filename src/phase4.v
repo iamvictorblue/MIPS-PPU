@@ -384,7 +384,7 @@ module phase4_tb;
         .RW                             (RD_WB),
         .RA                             (rs),
         .RB                             (rt),
-        .LE                             (WB_Register_File_Enable),
+        .LE                             (control_signals_out_MEM_WB[3]),
         .Clk                            (clk)
     );
 
