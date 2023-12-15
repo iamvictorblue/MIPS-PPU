@@ -234,7 +234,7 @@ module phase4_tb;
     // Instruction Memory
     rom_512x8 ROM (
         .DataOut(instruction), // OUT
-        .Address(PC[8:0])      // IN
+        .Address(PC_dummy[8:0])      // IN
     );
 
 
@@ -282,8 +282,8 @@ module phase4_tb;
     // -|-|-|-|-|-|-|-|----- I D  S T A G E -----|-|-|-|-|-|-|-|- //
 
     IF_ID_Register if_id_register(
-        .clk(Clk),
-        .reset(Reset),
+        .clk(clk),
+        .reset(clr),
         .instruction_in(instruction),
         .PC(PC_dummy),
         .LE(LE),
@@ -409,8 +409,8 @@ module phase4_tb;
     // -|-|-|-|-|-|-|-|----- E X  S T A G E -----|-|-|-|-|-|-|-|- //
 
     ID_EX_Register id_ex_register(
-        .clk(Clk),
-        .reset(Reset),
+        .clk(clk),
+        .reset(clr),
         .instruction_in(instruction),
         .PC(PC_ID),
         .control_signals_in(control_signals_from_cu),
@@ -455,8 +455,8 @@ module phase4_tb;
   
     // ALU instantiation
     ALU alu (
-        .A(pa),
-        .B(pb),
+        .A(EX_MX1),
+        .B(EX_MX2),
         .opcode(ALUOp),
         .Out(ALU_OUT),
         .Z(Z)
@@ -500,8 +500,8 @@ module phase4_tb;
 
    
     EX_MEM_Register ex_mem_register(
-        .clk(Clk),
-        .reset(Reset),
+        .clk(clk),
+        .reset(clr),
         .PC(PC_EX),
         .control_signals_in(control_signals_out_EX_MEM), // Connect only the relevant 10 bits
         .WriteDestination_EX(WriteDestination_EX),
@@ -517,8 +517,8 @@ module phase4_tb;
 );
 
     MEM_WB_Register mem_wb_register(
-        .clk(Clk),
-        .reset(Reset),
+        .clk(clk),
+        .reset(clr),
         .control_signals_in(control_signals_out_MEM_WB),
         .MEM_MUX(MEM_MUX),
         .WriteDestination_MEM(WriteDestination_MEM),
@@ -595,8 +595,8 @@ module phase4_tb;
         
     // end
     initial begin
-        $monitor("|TIME: %d|Clk: %b | PC_dummy: %d|ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
-        $time,clk, PC_dummy, pa , pb ,ALU_OUT );
+        $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d| ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
+        $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
         
     end
     
