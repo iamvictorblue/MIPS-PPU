@@ -61,7 +61,6 @@ module phase4_tb;
     wire [1:0] forwardPC;               // Selects an option from the MUX that inside a nPC/PC logic box
     
     wire forwardCU;
-    // reg forwardCU;
 
     // Instruction Signals from the Control Unit
     wire [19:0] instr_signals;     // Unslized Control Unit instructions between CU and CU_MUX
@@ -74,7 +73,6 @@ module phase4_tb;
     RegFileEnable, Jump_Addr_MUX_Enable, LoEnable, MemtoReg, Load,CMUX;
 
     wire [1:0] Data_Mem_Size;
-
     wire [2:0] S0_S2;
     wire [3:0] ALUOp;
 
@@ -141,7 +139,7 @@ module phase4_tb;
     wire [15:0] imm16Handler_EX;  // 16-bit signal
     wire [4:0] rs_EX, rt_EX, rd_EX;  // 5-bit signals for register addresses
     wire [10:0] control_signals_out_ID_EX;  // 19-bit signal
-    wire [10:0] control_signals_out_EX_MEM;  // 19-bit signal
+    wire [4:0] control_signals_out_EX_MEM;  // 19-bit signal
     wire [10:0] control_signals_out_MEM_WB;  // 19-bit signal
     wire [4:0] control_signals_out_WB;
     wire CC_Enable;     // Condition Code Enable
@@ -435,7 +433,7 @@ module phase4_tb;
         .reset(clr),
         .instruction_in(instruction),
         .PC(PC_ID),
-        .control_signals_in(control_signals_to_registers),
+        .control_signals_in(control_signals_cmux[17:0]),
         .rs_ID(rs),
         .rt_ID(rt),
         .rd_ID(rd),
@@ -473,7 +471,7 @@ module phase4_tb;
         .LO(lo_out_signal),
         .PC(PC_EX),
         .imm16(imm16Handler_EX),
-        .S0_S2(control_signals_to_registers[17:15]),
+        .S0_S2(control_signals_cmux[17:15]),
         .N(operand2_handler_out)
     );
   
@@ -481,7 +479,7 @@ module phase4_tb;
     ALU alu (
         .A(EX_MX1),
         .B(operand2_handler_out),
-        .opcode(control_signals_to_registers[14:11]),
+        .opcode(control_signals_cmux[14:11]),
         .Out(ALU_OUT),
         .Z(Z)
     );
@@ -545,7 +543,7 @@ module phase4_tb;
         .Y                       (MEM_OUT),
         .I0                      (MEM_ALU_OUT_Address),
         .I1                      (DataMemory_OUT),
-        .S                       (control_signals_out_ID_EX[5])
+        .S                       (control_signals_out_EX_MEM[5])
     );
     
     MEM_WB_Register mem_wb_register(
@@ -656,7 +654,7 @@ module phase4_tb;
         // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
         // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
         // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
-            $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d| CU_signals_MEM: %b|", $time, control_signals_cu, PC_dummy, WriteDestination_WB,control_signals_out_MEM_WB);
+            $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d| CU_signals_MEM: %b|", $time, control_signals_cu, PC_dummy, WriteDestination_WB,control_signals_out_EX_MEM);
     end
     
 
