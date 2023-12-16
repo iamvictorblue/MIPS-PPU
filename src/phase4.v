@@ -59,8 +59,6 @@ module phase4_tb;
 
     wire [1:0] forwardOutputHandler;    // Selects an option from the MUX connected to the output handler
     wire [1:0] forwardPC;               // Selects an option from the MUX that inside a nPC/PC logic box
-    
-    wire forwardCU;
 
     // Instruction Signals from the Control Unit
     wire [19:0] instr_signals;     // Unslized Control Unit instructions between CU and CU_MUX
@@ -91,8 +89,8 @@ module phase4_tb;
 
 
     // Testbench signal declarations
-    wire [23:0] control_signals_cu;
-    wire [23:0] control_signals_cmux;
+    wire [24:0] control_signals_cu;
+    wire [24:0] control_signals_cmux;
     wire [17:0] control_signals_to_registers; 
 
     // Outputs of Components
@@ -165,14 +163,11 @@ module phase4_tb;
     wire [4:0] operandA_hazard_forwarding_unit; // Connect to source operand A in ID stage
     wire [4:0] operandB_hazard_forwarding_unit; // Connect to source operand B in ID stage
 
-    wire [31:0] N; // Source2 Operand Handler output
     wire [3:0] ALU_FLAGS;
-
-    wire [4:0] RD_EX; // Destination Register filtered by a MUX (EX)
 
     // MEM Stage
     // --------------------------------------------------------------------------------------------
-    wire [4:0] RD_MEM; // Destination Register filtered by a MUX (MEM)
+    wire [4:0] RD_MEM;                      // Destination Register filtered by a MUX (MEM)
     wire [4:0] DataMemInstructions;         // This goes on the Data Memory
     wire [2:0] OutputHandlerInstructions;   // This goes on the output handler
     wire [31:0] MEM_ALU_OUT_Address;
@@ -245,24 +240,21 @@ module phase4_tb;
     // Data Memory
     ram_512x8 RAM (
         .DataOut                        (DataMemory_OUT),
-        .SignExtend                     (control_signals_out_MEM_WB[6]),   
-        .ReadWrite                      (control_signals_out_MEM_WB[10]),      
-        .Enable                         (control_signals_out_MEM_WB[9]), 
-        .Size                           (control_signals_out_MEM_WB[8:7]),
+        .SignExtend                     (DataMemInstructions[0]),   
+        .ReadWrite                      (DataMemInstructions[4]),      
+        .Enable                         (DataMemInstructions[3]), 
+        .Size                           (DataMemInstructions[2:1]),
         .Address                        (MEM_ALU_OUT_Address[7:0]),
         .DataIn                         (MEM_MX2)
     );
 
-
      // Precharging the Instruction Memory
     initial begin
+        // Mi primera Chaaamba
         fi = $fopen("p4.txt","r");
         Addr = 9'b00000000;
-        // $display("Precharging Instruction Memory...\n---------------------------------------------\n");
         while (!$feof(fi)) begin
-            // if (Addr % 4 == 0 && !$feof(fi)) $display("\n\nLoading Next Instruction...\n-------------------------------------------------------------------------");
             code = $fscanf(fi, "%b", data);
-            // $display("---- %b ----     Address: %d\n", data, Addr);
             ROM.Mem[Addr] = data;
             RAM.Mem[Addr] = data;
             Addr = Addr + 1;
@@ -356,7 +348,7 @@ module phase4_tb;
     );
 
     ControlUnitMUX control_unit_mux_inst (
-        .CMUX(control_signals_cu[20]),
+        .CMUX(control_signals_cu[22]),
         .control_signals_in(control_signals_cu),
         .control_signals_out(control_signals_cmux)
     );
@@ -373,7 +365,7 @@ module phase4_tb;
         .I0                      (rs),
         .I1                      (rt),
         .I2                      (5'd31),
-        .S                       (control_signals_cu[19:18])
+        .S                       (control_signals_cmux[21:20])
     );
 
     // Register File, saves operand and destiny registers
@@ -388,7 +380,6 @@ module phase4_tb;
         .Clk                            (clk)
     );
 
-    
 
     // Instantiation of HiRegister
     HiRegister hi_reg_inst (
@@ -436,7 +427,7 @@ module phase4_tb;
         .control_signals_in(control_signals_cmux[17:0]),
         .rs_ID(rs),
         .rt_ID(rt),
-        .rd_ID(rd),
+        // .rd_ID(rd),
         .ID_TA(ID_TA),
         .hi_signal_ID(hi_out_signal),
         .lo_signal_ID(lo_out_signal),
@@ -481,7 +472,8 @@ module phase4_tb;
         .B(operand2_handler_out),
         .opcode(control_signals_cmux[14:11]),
         .Out(ALU_OUT),
-        .Z(Z)
+        .Z(Z_condition_handler),
+        .N(N_condition_handler)
     );
 
 
@@ -496,6 +488,8 @@ module phase4_tb;
 
     // Instantiation of Hazard_Forwarding_Unit
     hazard_forwarding_unit hazard_forwarding_unit_instance (
+
+        .EX_load_instr                  (control_signals_out_ID_EX[0]),
         .forwardMX1                     (forwardMX1),
         .forwardMX2                     (forwardMX2),
         
@@ -503,19 +497,18 @@ module phase4_tb;
         .PC_LE                          (PC_LE),
         .IF_ID_LE                       (IF_ID_Pipeline_LE),
 
-        .CU_S                           (forwardCU), 
 
-        .EX_Register_File_Enable        (EX_CU[4]),
-        .MEM_Register_File_Enable       (MEM_CU),
-        .WB_Register_File_Enable        (WB_Register_File_Enable),
+        .EX_Register_File_Enable        (control_signals_out_ID_EX[3]),
+        .MEM_Register_File_Enable       (control_signals_out_EX_MEM[3]),
+        .WB_Register_File_Enable        (RegFileEnable),
 
        
-        .EX_RD                          (RD_EX),
-        .MEM_RD                         (RD_MEM),
-        .WB_RD                          (RD_WB),
+        .EX_RD                          (rd_EX),    // rd_EX
+        .MEM_RD                         (RD_MEM),   // rd_MEM
+        .WB_RD                          (RD_WB),    // RD_WB
 
-        .operandA(operandA_hazard_forwarding_unit),
-        .operandB(operandB_hazard_forwarding_unit)
+        .operandA(rs),
+        .operandB(rt)
     );
 
     // -|-|-|-|-|-|-|-|----- M E M  S T A G E -----|-|-|-|-|-|-|-|- //
@@ -530,13 +523,16 @@ module phase4_tb;
         .JalAdder_EX(JalAdder_EX),
         .EX_MX2(EX_MX2),
         .EX_ALU_OUT(ALU_OUT),
-
+        .EX_RD(rd_EX),
+        
         .MEM_ALU_OUT(MEM_ALU_OUT_Address),
         .MEM_MX2(MEM_MX2),
         .JalAdder_MEM(JalAdder_MEM),
         .WriteDestination_MEM(WriteDestination_MEM),
         .PC_MEM(PC_MEM),
-        .EX_MEM_control_signals(control_signals_out_EX_MEM)
+        .EX_MEM_control_signals(control_signals_out_EX_MEM),
+        .MEM_RD(RD_MEM),
+        .Data_Mem_instructions (DataMemInstructions)
     );
 
     mux_2x1 MEM_MUX (
@@ -553,6 +549,7 @@ module phase4_tb;
         .MEM_control_signals_in(control_signals_out_EX_MEM),
         .WriteDestination_MEM(WriteDestination_MEM),
         .JalAdder_MEM(JalAdder_MEM),
+        .MEM_RD(RD_MEM),
 
         //output
         .MEM_OUT_WB(MEM_OUT_MEM),
@@ -561,7 +558,8 @@ module phase4_tb;
         .hi_enable(HiEnable),
         .lo_enable(LoEnable), 
         .RegFileEnable(RegFileEnable), // Output relevant control signals for WB stage
-        .MemtoReg(MemtoReg) 
+        .MemtoReg(MemtoReg),
+        .WB_RD(RD_WB)
         
     );
 
@@ -639,6 +637,8 @@ module phase4_tb;
     // end
 
     initial begin
+        $dumpfile("test.vcd"); // pass this to GTK Wave to visualize better wtf is going on
+        $dumpvars(0, phase4_tb);
         #100;
         $display("\n----------------------------------------------------------\nSimmulation Complete!");
         $finish;
@@ -649,14 +649,55 @@ module phase4_tb;
     //     $time,clk, PC_dummy, nPC, clr, PC_MUX_OUT, register_file.Q5, register_file.Q6, register_file.Q16, register_file.Q17, register_file.Q18);
         
     // end
-    initial begin
-        // $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d| ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
-        // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
-        // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
-        // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
-            $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d| CU_signals_MEM: %b|", $time, control_signals_cu, PC_dummy, WriteDestination_WB,control_signals_out_EX_MEM);
-    end
+    // initial begin
+    //     // $monitor("|TIME: %d|Clk: %b | PC_dummy: %d| nPC: %d| ALU_A: %d|ALU_B: %d|ALU_OUT: %d",
+    //     // $time,clk, PC_dummy, nPC, pa , pb ,ALU_OUT );
+    //     // $monitor("TIME: %d | Clk: %b | PC_dummy: %d|pb: %b   |  hi_out_signal: %b  | lo_out_signal: %b  | PC_EX: %b  | op2_h_out: %b  | imm16Handler_EX: %b  | S0_S2: %b  | instruction: %b ",
+    //     // $time,clk,PC_dummy,pb,hi_out_signal,lo_out_signal, PC_EX, operand2_handler_out, imm16Handler_EX,S0_S2,instruction);
+    //         $monitor("|Time: %d| control_signals_cu: %b| PC: %d| Write Destination: %d| CU_signals_MEM: %b|", $time, control_signals_cu, PC_dummy, WriteDestination_WB,control_signals_out_EX_MEM);
+    // end
     
+
+    // initial begin
+    //     $monitor(
+    //         "|Time: %d| PC: %d| Instr: %b| ALU_OUT: %d| Mem_Addr: %d| Mem_Data_Out: %d| Reg_Write: %b| Reg_Data: %d| Jump: %b",
+    //         $time,
+    //         PC_dummy,            // Current Program Counter
+    //         instruction,         // Current Instruction
+    //         ALU_OUT,             // ALU Output
+    //         MEM_ALU_OUT_Address, // Memory Address used for data access
+    //         DataMemory_OUT,      // Data Memory Output
+    //         WB_Register_File_Enable, // Register Write Enable
+    //         WB_OUT,                     // Data to be written to the register
+    //         control_signals_cu[24]              // Branch control signal
+    //     );
+    // end
+
+initial begin
+    $monitor(
+        "|Time: %d| PC: %d| Instr: %b| ALU_OUT: %d| Mem_Addr: %d| Mem_Data_Out: %d| Reg_Write: %b| Reg_Data: %d| Branch: %b| Cond_Mux: %b| rs: %d| rt: %d| rd: %d| nPC: %d| Data_In: %d| ALU_A: %d| ALU_B: %d| CU_Signals: %b| ID_Instr: %b| EX_Instr: %b|",
+        $time,
+        PC_dummy,            // Current Program Counter
+        instruction,         // Current Instruction
+        ALU_OUT,             // ALU Output
+        MEM_ALU_OUT_Address, // Memory Address used for data access
+        DataMemory_OUT,      // Data Memory Output
+        WB_Register_File_Enable, // Register Write Enable
+        WB_OUT,              // Data to be written to the register
+        Branch,              // Branch control signal
+        Cond_Mux,            // Condition Mux signal
+        rs,                  // Source register rs
+        rt,                  // Source register rt
+        rd,                  // Destination register rd
+        nPC,                 // Next Program Counter
+        MEM_MX2,             // Data input to Memory
+        EX_MX1,              // ALU operand A
+        operand2_handler_out,// ALU operand B
+        control_signals_cu,  // Control Unit Signals
+        instruction_id,      // Instruction at ID Stage
+        control_signals_out_ID_EX // Instruction at EX Stage
+    );
+end
 
 
 endmodule
