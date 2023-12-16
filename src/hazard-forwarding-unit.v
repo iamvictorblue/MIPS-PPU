@@ -8,21 +8,20 @@ module hazard_forwarding_unit (
     output reg PC_LE,
     output reg IF_ID_LE,
 
-    output reg CU_S,
-
     input wire EX_Register_File_Enable,
     input wire MEM_Register_File_Enable,
     input wire WB_Register_File_Enable,
 
+    // WTF IS A KILoMeTERRRRRRRRRRRRRRRRRRRRRRR
+    //              - the destiny register, 2023
+    // TODO: Propagate through the pipelines
     input wire [4:0] EX_RD,
     input wire [4:0] MEM_RD,
     input wire [4:0] WB_RD,
 
     input wire [4:0] operandA, // Source operand A in ID stage
     input wire [4:0] operandB, // Source operand B in ID stage
-    input wire [4:0] ID_rd,
-    input wire EX_load_instr,
-    input wire ID_store_instr
+    input wire EX_load_instr
 );
 
     always @* begin
@@ -48,12 +47,10 @@ module hazard_forwarding_unit (
             nPC_LE          <= 1'b0; // Disable Load Enable of the Next Program Counter (nPC)
             PC_LE           <= 1'b0; // Disable Load Enable of the Program Counter (PC)
             IF_ID_LE        <= 1'b0; // Disable IF/ID Pipeline Register from loading
-            CU_S            <= 1'b1; // Forward Control Signals corresponding to a NOP instruction
         end else begin               // Hazard not asserted
             nPC_LE          <= 1'b1; // Program Counter is Load Enable
             PC_LE           <= 1'b1; // Next Program Counter is Load Enable
             IF_ID_LE        <= 1'b1; // IF/ID Pipeline Register is enabled
-            CU_S            <= 1'b0; // Dont Forward Control Signals corresponding to a NOP instruction
         end
         // $display("PC_LE: %b, EX_load_instr: %b", PC_LE, EX_load_instr);
     end

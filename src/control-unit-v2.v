@@ -2,8 +2,8 @@
 
 module ControlUnitMUX(
     input CMUX,
-    input [23:0] control_signals_in, // Input control signals
-    output reg [23:0] control_signals_out //  control signals
+    input [24:0] control_signals_in, // Input control signals
+    output reg [24:0] control_signals_out //  control signals
 );
 
     always @(*) begin
@@ -19,7 +19,7 @@ endmodule
 
 module ControlUnit(
     input [31:0] instruction,
-    output reg [23:0] instr_signals      
+    output reg [24:0] instr_signals      
 );
      reg Cond_Mux;    //1     // condition check, e.g., for branches
      reg Jump; //2

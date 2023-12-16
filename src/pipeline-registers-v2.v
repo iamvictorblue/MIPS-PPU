@@ -47,10 +47,10 @@ module ID_EX_Register(
 
     input [31:0] instruction_in,
     input [31:0] PC, // fase 4
-    input [17:0] control_signals_in, //control signals in //16 bits
-    input wire [4:0]  rs_ID,            // rs
-    input wire [4:0]  rt_ID,              // rt
-    input wire [4:0]  rd_ID,
+    input [17:0] control_signals_in,        // control signals in //16 bits
+    input wire [4:0]  rs_ID,                // rs
+    input wire [4:0]  rt_ID,                // rt
+    // input wire [4:0]  rd_ID,                // Refer to hazard forwarding unit (EX_RD)
 
     input wire [31:0] hi_signal_ID,
     input wire [31:0] lo_signal_ID,
@@ -76,11 +76,11 @@ module ID_EX_Register(
 
     output reg [31:0] EX_MX1,
     output reg [31:0] EX_MX2,
-    output reg [4:0]  rs_EX,            // rs
-    output reg [4:0]  rt_EX,              // rt
-    output reg [4:0]  rd_EX,
+    output reg [4:0]  rs_EX,        // rs
+    output reg [4:0]  rt_EX,        // rt
+    output reg [4:0]  rd_EX,        // Refer to hazard forwarding unit (EX_RD)
     output reg [31:0] EX_TA,
-    output reg [31:0] PC_EX// para source operand2 handler
+    output reg [31:0] PC_EX         // para source operand2 handler
     
 );
 
@@ -113,7 +113,7 @@ always @(posedge clk)
         EX_MX2 <= ID_MX2;
         rs_EX <= instruction_in[25:21];   
         rt_EX <=  instruction_in[20:16];
-        rd_EX <=  instruction_in[15:11];
+        rd_EX <=  instruction_in[15:11]; // RD from ID, but directly
         EX_TA <= ID_TA;
         EX_ALU_OP_instr <= control_signals_in[14:11];
         EX_S02_instr <= control_signals_in[17:15];
@@ -129,24 +129,24 @@ endmodule
 module EX_MEM_Register(
     input clk,
     input reset,
-    input wire [31:0] PC,
-    input wire [4:0] WriteDestination_EX,
-    input wire [31:0] JalAdder_EX,
-    input wire [31:0] EX_MX2,
-    input wire [31:0] EX_ALU_OUT,
-    input wire [10:0] EX_control_signals_in, // Include relevant control signals from EX stage
+    input wire [31:0]   PC,
+    input wire [4:0]    WriteDestination_EX,
+    input wire [31:0]   JalAdder_EX,
+    input wire [31:0]   EX_MX2,
+    input wire [31:0]   EX_ALU_OUT,
+    input wire [10:0]   EX_control_signals_in, // Include relevant control signals from EX stage
+    input wire [4:0]    EX_RD,
 
+    output reg [31:0]   MEM_ALU_OUT,
+    output reg [31:0]   MEM_MX2,
+    output reg [31:0]   JalAdder_MEM,
+    output reg [4:0]    WriteDestination_MEM,
+    output reg [31:0]   PC_MEM,
+    output reg [4:0]    MEM_RD,
 
-    output reg [31:0] MEM_ALU_OUT,
-    output reg [31:0] MEM_MX2,
-    output reg [31:0] JalAdder_MEM,
-    output reg [4:0] WriteDestination_MEM,
-    output reg [31:0] PC_MEM,
-
-
-    output reg [4:0] EX_MEM_control_signals, // Output relevant control signals for MEM stag
-    output reg [5:0] Data_Mem_instructions,
-    output reg MEM_MUX
+    output reg [4:0]    EX_MEM_control_signals, // Output relevant control signals for MEM stag
+    output reg [4:0]    Data_Mem_instructions,
+    output reg          MEM_MUX
 );
 
 always @(posedge clk) 
@@ -160,6 +160,7 @@ always @(posedge clk)
         EX_MEM_control_signals <= 6'b0;
         Data_Mem_instructions <= 5'b0;
         MEM_MUX <= 1'b0;
+        MEM_RD <= 5'b0;
     end else begin
         // Copy input values to respective output registers and control signals
         MEM_ALU_OUT <= EX_ALU_OUT;
@@ -170,6 +171,7 @@ always @(posedge clk)
         WriteDestination_MEM <= WriteDestination_EX;
         PC_MEM <= PC;
         EX_MEM_control_signals <= EX_control_signals_in[4:0]; // Relevant signals for MEM stage
+        MEM_RD <= EX_RD;
     end
 endmodule
 
@@ -177,21 +179,20 @@ module MEM_WB_Register(
 
     input clk,
     input reset,
-    input wire [4:0] MEM_control_signals_in, // Include relevant control signals from MEM stage
-    input wire [4:0] WriteDestination_MEM,
-    input wire [31:0] JalAdder_MEM,
-    input wire [31:0] MEM_OUT_MEM,
+    input wire [4:0]        MEM_control_signals_in, // Include relevant control signals from MEM stage
+    input wire [4:0]        WriteDestination_MEM,
+    input wire [31:0]       JalAdder_MEM,
+    input wire [31:0]       MEM_OUT_MEM,
+    input wire [4:0]        MEM_RD,
 
-    output reg [31:0] MEM_OUT_WB,
-    output reg [31:0] JalAdder_WB,
-    output reg [4:0] WriteDestination_WB,
-    output reg  hi_enable,
-    output reg  lo_enable, 
-    output reg  RegFileEnable, // Output relevant control signals for WB stage
-    output reg  MemtoReg // Output relevant control signals for WB stage
-    
-
-    
+    output reg [31:0]       MEM_OUT_WB,
+    output reg [31:0]       JalAdder_WB,
+    output reg [4:0]        WriteDestination_WB,
+    output reg              hi_enable,
+    output reg              lo_enable, 
+    output reg              RegFileEnable, // Output relevant control signals for WB stage
+    output reg              MemtoReg, // Output relevant control signals for WB stage
+    output reg [4:0]        WB_RD
 );
 
 always @(posedge clk) 
@@ -204,7 +205,7 @@ always @(posedge clk)
         lo_enable <= 1'b0;
         RegFileEnable <= 1'b0;
         MemtoReg <= 1'b0;
-
+        WB_RD <= 5'b0;
         
     end else begin
         // Copy input values to respective output registers and control signals
@@ -215,42 +216,6 @@ always @(posedge clk)
         lo_enable <= MEM_control_signals_in[2];
         RegFileEnable <= MEM_control_signals_in[3];
         MemtoReg <= MEM_control_signals_in[1];
-
-
+        WB_RD <= MEM_RD;
     end
 endmodule
-
-
-
-// endmodule
-
-// module MEM_WB_Register(
-//     input clk,
-//     input reset,
-//     input [31:0] alu_result_in,
-//     input [31:0] mem_data_in, // Data read from memory
-//     input [4:0] write_reg_in,
-//     input [8:0] control_signals_in,
-//     output reg [31:0] alu_result_out,
-//     output reg [31:0] mem_data_out,
-//     output reg [4:0] write_reg_out,
-//     output reg [8:0] control_signals_out
-// );
-
-// always @(posedge clk or posedge reset) begin
-//     if (reset) begin
-//         alu_result_out <= 32'b0;
-//         mem_data_out <= 32'b0;
-//         write_reg_out <= 5'b0;
-//         control_signals_out <= 9'b0;
-//     end else begin
-//         alu_result_out <= alu_result_in;
-//         mem_data_out <= mem_data_in;
-//         write_reg_out <= write_reg_in;
-//         control_signals_out <= control_signals_in;
-//     end
-// end
-
-// endmodule
-
-// prueba EX/MEM
