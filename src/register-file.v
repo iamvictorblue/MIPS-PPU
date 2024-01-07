@@ -2,7 +2,7 @@
 
 //Escrito por: Victor Hernandez (802-19-4188)
 
-module RegisterFile (output [31:0] PA, PB, input [31:0] PW,  input [4:0] RW, RA, RB, input LE, Clk);
+module RegisterFile (output [31:0] PA, PB, input [31:0] PW,  input [4:0] RW, RA, RB, input LE, Clk,clr);
     //Outputs: Puertos A y B
     //Inputs: Puerto de Entrada (PW), RW (Write Register) y LE (BinaryDecoder Selector y "load"), 
     //RA, RB y RD  (Selectors de multiplexers a la salida), y Clk (Clock)
@@ -30,103 +30,42 @@ module RegisterFile (output [31:0] PA, PB, input [31:0] PW,  input [4:0] RW, RA,
                     Q23, Q24, Q25, Q26, Q27, Q28, Q29, Q30, Q31);             
    
     //Instanciando registros del 0 al 31
-    register_32bit R0 (Q0, PW, Clk, E[0]);
-    register_32bit R1 (Q1, PW, Clk, E[1]);
-    register_32bit R2 (Q2, PW, Clk, E[2]);
-    register_32bit R3 (Q3, PW, Clk, E[3]);
-    register_32bit R4 (Q4, PW, Clk, E[4]);
-    register_32bit R5 (Q5, PW, Clk, E[5]);
-    register_32bit R6 (Q6, PW, Clk, E[6]);
-    register_32bit R7 (Q7, PW, Clk, E[7]);
-    register_32bit R8 (Q8, PW, Clk, E[8]);
-    register_32bit R9 (Q9, PW, Clk, E[9]);
-    register_32bit R10 (Q10, PW, Clk, E[10]);
-    register_32bit R11 (Q11, PW, Clk, E[11]);
-    register_32bit R12 (Q12, PW, Clk, E[12]);
-    register_32bit R13 (Q13, PW, Clk, E[13]);
-    register_32bit R14 (Q14, PW, Clk, E[14]);
-    register_32bit R15 (Q15, PW, Clk, E[15]);
-    register_32bit R16 (Q16, PW, Clk, E[16]);
-    register_32bit R17 (Q17, PW, Clk, E[17]);
-    register_32bit R18 (Q18, PW, Clk, E[18]);
-    register_32bit R19 (Q19, PW, Clk, E[19]);
-    register_32bit R20 (Q20, PW, Clk, E[20]);
-    register_32bit R21 (Q21, PW, Clk, E[21]);
-    register_32bit R22 (Q22, PW, Clk, E[22]);
-    register_32bit R23 (Q23, PW, Clk, E[23]);
-    register_32bit R24 (Q24, PW, Clk, E[24]);
-    register_32bit R25 (Q25, PW, Clk, E[25]);
-    register_32bit R26 (Q26, PW, Clk, E[26]);
-    register_32bit R27 (Q27, PW, Clk, E[27]);
-    register_32bit R28 (Q28, PW, Clk, E[28]);
-    register_32bit R29 (Q29, PW, Clk, E[29]);
-    register_32bit R30 (Q30, PW, Clk, E[30]);
-    register_32bit R31 (Q31, PW, Clk, E[31]);
+    register_32bit R0 (Q0, PW, Clk, E[0],clr);
+    register_32bit R1 (Q1, PW, Clk, E[1],clr);
+    register_32bit R2 (Q2, PW, Clk, E[2],clr);
+    register_32bit R3 (Q3, PW, Clk, E[3],clr);
+    register_32bit R4 (Q4, PW, Clk, E[4],clr);
+    register_32bit R5 (Q5, PW, Clk, 1'b1,clr);
+    register_32bit R6 (Q6, PW, Clk, 1'b1,clr);
+    register_32bit R7 (Q7, PW, Clk, E[7],clr);
+    register_32bit R8 (Q8, PW, Clk, E[8],clr);
+    register_32bit R9 (Q9, PW, Clk, E[9],clr);
+    register_32bit R10 (Q10, PW, Clk, E[10],clr);
+    register_32bit R11 (Q11, PW, Clk, E[11],clr);
+    register_32bit R12 (Q12, PW, Clk, E[12],clr);
+    register_32bit R13 (Q13, PW, Clk, E[13],clr);
+    register_32bit R14 (Q14, PW, Clk, E[14],clr);
+    register_32bit R15 (Q15, PW, Clk, E[15],clr);
+    register_32bit R16 (Q16, PW, Clk, 1'b1,clr);
+    register_32bit R17 (Q17, PW, Clk, 1'b1,clr);
+    register_32bit R18 (Q18, PW, Clk, 1'b1,clr);
+    register_32bit R19 (Q19, PW, Clk, E[19],clr);
+    register_32bit R20 (Q20, PW, Clk, E[20],clr);
+    register_32bit R21 (Q21, PW, Clk, E[21],clr);
+    register_32bit R22 (Q22, PW, Clk, E[22],clr);
+    register_32bit R23 (Q23, PW, Clk, E[23],clr);
+    register_32bit R24 (Q24, PW, Clk, E[24],clr);
+    register_32bit R25 (Q25, PW, Clk, E[25],clr);
+    register_32bit R26 (Q26, PW, Clk, E[26],clr);
+    register_32bit R27 (Q27, PW, Clk, E[27],clr);
+    register_32bit R28 (Q28, PW, Clk, E[28],clr);
+    register_32bit R29 (Q29, PW, Clk, E[29],clr);
+    register_32bit R30 (Q30, PW, Clk, E[30],clr);
+    register_32bit R31 (Q31, PW, Clk, 1'b1,clr);
 
 endmodule
 
-`timescale 1ns / 1ns
 
-//Test for Register File 
-// module test_RegisterFile;
-
-//     //Inputs
-//     reg [31:0] PW;
-//     reg [4:0] RW, RA, RB;
-//     reg LE, Clk;
-
-//     //Outputs
-//     wire [31:0] PA, PB;
-
-//     //Instantiating RegisterFile module
-//     RegisterFile regFile (PA, PB, PW, RW, RA, RB, LE, Clk);
-
-//     //Running clock
-//     initial begin
-        
-//         #1 //una unidad de tiempo para la estabilizacion de las señales
-
-//         RA = 5'b00000;
-//         RB = 5'b11111;
-//         PW = 32'b00000000000000000000000000010100; //20
-//         RW = 5'b00000; //0
-
-//         repeat (32) begin //cada cuatro unidades de tiempo se debe incrementar por uno los valores de PW, RW, RA, RB y RD hasta que RA alcance el valor de 31.
-//         #4 //clock period
-//         RW = RW + 1;
-//         RA = RA + 1;
-//         RB = RB + 1;
-//         PW = PW + 1;
-        
-//         end
-
-//     end
-
-//     initial begin   
-//         // Se inicializa el reloj en cero a tiempo cero y luego debe cambiar de estado cada dos unidades de tiempo de manera perpetua.
-//         Clk = 0;
-//         LE = 1;
-//         forever #2 Clk = ~Clk;
-
-//     end
-
-
-//     initial begin
-//         $display ("     PW         PA          PB        ||||  RW RA RB  LE Clk");
-//         $monitor("%d | %d | %d  |||| %d  %d  %d  %d  %b  ", PW, PA, PB, RW, RA, RB, LE, Clk, $time);
-
-//     end
-
-//     initial 
-//         #200 $finish;
-
-// endmodule
-
-//-----------------Modules that will be instantiated in the file------------------------------//
-
-//MULTIPLEXOR 32X1 - S and R0-R31 are 32bit inputs. Y is a 32bit output.
-//A case for S is used to select one of the R0-R31 and assign the output to Y.
-//We will be instantiating three of them due to it being a three port register file.
 
 module mux_32x1_32bit (output reg [31:0] Y, input [4:0] S, 
 input [31:0] R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15,
@@ -251,26 +190,10 @@ module binaryDecoder (output reg [31:0] E, input [4:0] C, input RF);
     end
 endmodule
 
-//REGISTER - The register takes care of charging the data in D to the Q output register.
-//Ld signal will indicate the register that isn't 0 and make Q the output for the bits in the register.
-//Clk is the clock that syncs the register with the rest.
-
-module register_32bit (output reg [31:0] Q, input [31:0] D, input Clk, Ld);
+module register_32bit (output reg [31:0] Q, input [31:0] D, input Clk, Ld,rst);
     always @ (posedge Clk)
+    if(rst)
+    Q<=32'd0;
+    else
         if(Ld) Q <= D;
 endmodule
-
-// Three Port Register File
-
-// Reading:
-
-// El contenido de un registro se coloca en un puerto de salida P cuando el número de registro se especifica 
-// en su correspondiente entrada de selección de registro R. Esta acción se lleva a cabo tan pronto como el 
-// número de registro se coloca en la entrada R correspondiente (es una acción asíncrona).
-
-// Writing:
-
-// Un número colocado en PW se escribirá en el registro especificado por la entrada RW, si y solo si, LE = 1 y 
-// el borde ascendente del reloj toma ritmo (esta es una acción sincrónica).
-
-// RA, RB, y RW son números de 5 bits PA, PB y PW son números de 32 bits

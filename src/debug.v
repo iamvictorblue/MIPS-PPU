@@ -14,7 +14,8 @@
 `include "output-handler.v"
 `include "hazard-forwarding-unit.v" 
 
-module debug(
+
+module debug();
 
     // Instruction Memory 
     integer fi, fo, code, i; 
@@ -56,7 +57,7 @@ module debug(
     wire [1:0] forwardPC;               // Selects an option from the MUX that inside a nPC/PC logic box
     
     wire forwardCU;
-);
+
 
  // Precharging the Instruction Memory
     initial begin

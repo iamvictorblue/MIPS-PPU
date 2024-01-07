@@ -78,7 +78,7 @@ module phase4_tb;
     wire [15:0] imm16;           // Corrected bit width
     wire [25:0] addr26;          // Corrected bit width
     wire [15:0] imm16Handler_ID;    // Corrected bit width
-    wire [4:0] rs, rt, rd, WriteDestination_ID;       // Corrected bit width for register addresses
+    wire [4:0] rs=5'd0, rt=5'd0, rd=5'd0, WriteDestination_ID=5'd0;       // Corrected bit width for register addresses
    
     wire [31:0] Base_Addr_SE;      // 32-bit signal for mux_2x1_base_addr
     wire [31:0] multiplierBy4_out; // 32-bit signal for multiplierBy4
@@ -374,10 +374,11 @@ module phase4_tb;
         .PB                             (pb),
         .PW                             (WB_OUT),
         .RW                             (WriteDestination_WB),
-        .RA                             (rs),
-        .RB                             (rt),
+        .RA                             (rs_EX),
+        .RB                             (rt_EX),
         .LE                             (RegFileEnable),
-        .Clk                            (clk)
+        .Clk                            (clk),
+        .clr                            (clr)
     );
 
 

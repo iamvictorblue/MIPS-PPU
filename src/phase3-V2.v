@@ -81,12 +81,12 @@ module MIPS_Pipeline_tb;
      // Instantiate the Control Unit
     ControlUnit control_unit(
         .instruction(instruction_id),
-        .instr_singals(.instr)
+        .instr_signals(instr)
     );
 
     // ControlUnitMUX instantiation
     ControlUnitMUX control_unit_mux_inst (
-        .S(S),
+        .CMUX(S),
         .control_signals_in(control_signals_from_cu),
         .control_signals_out(control_signals_to_registers)
     );

@@ -1,0 +1,241 @@
+**** module/scope: HiRegister
+     Flip-Flops   : 32
+     Logic Gates  : 0
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** TOTALS
+     Flip-Flops   : 32
+     Logic Gates  : 0
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: LoRegister
+     Flip-Flops   : 32
+     Logic Gates  : 0
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** TOTALS
+     Flip-Flops   : 32
+     Logic Gates  : 0
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile
+     Flip-Flops   : 0
+     Logic Gates  : 0
+**** module/scope: RegisterFile.R0
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R1
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R10
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R11
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R12
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R13
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R14
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R15
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R16
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R17
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R18
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R19
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R2
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R20
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R21
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R22
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R23
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R24
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R25
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R26
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R27
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R28
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R29
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R3
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R30
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R31
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R4
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R5
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R6
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R7
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R8
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.R9
+     Flip-Flops   : 32
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.bdecoder
+     Flip-Flops   : 0
+     Logic Gates  : 65
+     MUX[2]: 32 slices
+     LPM[5]: 1 unaccounted
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.mux_32x1A
+     Flip-Flops   : 0
+     Logic Gates  : 0
+     LPM[5]: 1 unaccounted
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** module/scope: RegisterFile.mux_32x1B
+     Flip-Flops   : 0
+     Logic Gates  : 0
+     LPM[5]: 1 unaccounted
+     LOG[13]: 1 unaccounted
+     LOG[14]: 1 unaccounted
+**** TOTALS
+     Flip-Flops   : 1024
+     Logic Gates  : 2145
+     MUX[2]: 1056 slices
+     LPM[5]: 3 unaccounted
+     LOG[13]: 35 unaccounted
+     LOG[14]: 35 unaccounted

@@ -14,15 +14,15 @@ module ram_512x8 (
             //write
             $display("Storing");
             case (Size)
-                3'b00:  begin
+                2'b00:  begin
                     Mem[Address] <= DataIn[7:0];
                     $display("%d    %h", Address, DataIn);
                 end
-                3'b01: begin
+                2'b01: begin
                     Mem[Address] <= DataIn[15:8];
                     Mem[Address+1] <= DataIn[7:0];
                 end
-                3'b10: begin
+                2'b10: begin
                     Mem[Address] <= DataIn[31:24];
                     Mem[Address + 1] <= DataIn[23:16];
                     Mem[Address + 2] <= DataIn[15:8];
